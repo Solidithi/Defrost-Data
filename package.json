@@ -1,14 +1,25 @@
 {
 	"name": "defrost-data",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
+	"description": "Data access layer ",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"exports": {
+    ".": "./dist/index.js",
+    "./prismaClient": "./dist/lib/client.js"
+  },
+
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint './**/*.{ts,tsx}'",
 		"lint:fix": "eslint './**/*.{ts,tsx}' --fix",
 		"format": "prettier --write './**/*.{ts,tsx,json,md}'",
-		"prepare": "husky"
+		"prepare": "husky",
+		"build": "tsc",
+		"prepublishOnly": "pnpm run build"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": [
