@@ -10,7 +10,7 @@ datasource db {
 model Project {
     projectId        String   @id // Maps to projectId in ProjectHub
     name             String
-    owner            String // Address of project owner
+    projectOwner     String // Address of project owner
     tokenAddress     String // Project token contract address
     tokenSymbol      String
     tokenDecimals    Int
@@ -24,7 +24,7 @@ model Project {
 
     // Relations
     pools        Pool[]
-    ownerDetails User   @relation(fields: [owner], references: [address])
+    ownerDetails User   @relation(fields: [projectOwner], references: [address])
 }
 
 model Pool {
