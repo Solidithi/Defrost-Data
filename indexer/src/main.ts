@@ -68,6 +68,7 @@ type LogsHandler = (
 	pendingLogs: Log[],
 	moreProps?: object
 ) => Promise<{
+	topic0: string;
 	success: boolean;
 	error: string | null;
 	unprocessedLogs: Log[];
@@ -104,11 +105,18 @@ processor.run(squidDb, async (ctx) => {
 	}
 
 	// Process aggregated batches of logs
-	await Promise.all(
-		Array.from(logsDispatch.entries()).map(async ([_, dispatch]) =>
+	const entries = Array.from(logsDispatch.entries());
+	const results = await Promise.all(
+		entries.map(async ([_, dispatch]) =>
 			dispatch.logsHandler(ctx, dispatch.pendingLogs)
 		)
 	);
+	results.map((result) => {
+		logsDispatch.set(result.topic0, {
+			...logsDispatch.get(result.topic0),
+			pendingLogs: result.unprocessedLogs,
+		});
+	});
 });
 
 async function handleProjectCreated(
@@ -116,6 +124,7 @@ async function handleProjectCreated(
 	pendingLogs: Log[],
 	moreProps?: object
 ): Promise<{
+	topic0: string;
 	success: boolean;
 	error: string | null;
 	unprocessedLogs: Log[];
@@ -171,11 +180,26 @@ async function handleProjectCreated(
 	console.log("New projects: ", projects.length);
 
 	// Insert users using ctx.store (will handle duplicates automatically)
-	await ctx.store.save(uniqueOwners);
-	await ctx.store.save(projects);
+	try {
+		await ctx.store.save(uniqueOwners);
+		await ctx.store.save(projects);
+	} catch (e) {
+		console.error("Error saving projects: ", e);
+		return {
+			topic0: projectLibraryAbi.events.ProjectCreated.topic,
+			success: false,
+			error: "Error saving projects: " + e,
+			unprocessedLogs: pendingLogs,
+		};
+	}
 
 	// TODO: implement this later
-	return { success: true, error: null, unprocessedLogs: [] };
+	return {
+		topic0: projectLibraryAbi.events.ProjectCreated.topic,
+		success: true,
+		error: null,
+		unprocessedLogs: [],
+	};
 }
 
 async function handleLaunchpoolCreated(
@@ -183,6 +207,7 @@ async function handleLaunchpoolCreated(
 	pendingLogs: Log[],
 	moreProps?: object
 ): Promise<{
+	topic0: string;
 	success: boolean;
 	error: string | null;
 	unprocessedLogs: Log[];
@@ -246,9 +271,20 @@ async function handleLaunchpoolCreated(
 		});
 	});
 
-	await ctx.store.save(pools);
+	try {
+		await ctx.store.save(pools);
+	} catch (e) {
+		console.error("Error saving pools: ", e);
+		return {
+			topic0: launchpoolLibraryAbi.events.LaunchpoolCreated.topic,
+			success: false,
+			error: "Error saving pools: " + e,
+			unprocessedLogs: pendingLogs,
+		};
+	}
 
 	return {
+		topic0: launchpoolLibraryAbi.events.LaunchpoolCreated.topic,
 		success: true,
 		error: null,
 		unprocessedLogs: [],
