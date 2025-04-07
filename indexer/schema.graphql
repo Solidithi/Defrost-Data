@@ -20,7 +20,7 @@ type Project @entity {
 
 type Pool @entity {
 	id: ID! # This is on-chain pool ID (yes, it's implicit af thanks to TypeORM constraint to have column called id)
-	address: String!
+	poolAddress: String!
 	poolType: PoolType!
 	projectId: String!
 	txHash: String!
@@ -39,16 +39,16 @@ type Pool @entity {
 	nativeAssetAddress: String!
 
 	# Pool configuration
-	maxVAssetsPerStaker: BigInt!
-	ownerShareOfInterest: Int!
+	# maxVAssetsPerStaker: BigInt!
+	# ownerShareOfInterest: Int!
 
 	# Live stats
 	totalStaked: BigInt!
 	totalStakers: Int!
 
 	# Exchange rates
-	currentNativeExRate: BigInt!
-	cumulativeProjectExRate: BigInt!
+	# currentNativeExRate: BigInt!
+	# cumulativeProjectExRate: BigInt!
 
 	# APY information
 	stakerAPY: Float!
