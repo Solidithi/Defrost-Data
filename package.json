@@ -1,5 +1,5 @@
 {
-  "name": "defrost-data",
+  "name": "defrost-data-monorepo",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -17,6 +17,8 @@
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
+		"@commitlint/cli": "^19.7.1",
+		"@commitlint/config-conventional": "^19.7.1",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint-config-prettier": "^10.1.1",
