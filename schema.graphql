@@ -1,1 +1,201 @@
-This is empty for now
+type Project @entity {
+	id: ID! # This is on-chain project ID (yes, it's implicit af thanks to TypeORM constraint to have column called id)
+	name: String
+	projectOwner: String!
+	tokenAddress: String
+	tokenSymbol: String
+	tokenDecimals: Int
+	logo: String
+	images: [String!]
+	shortDescription: String
+	longDescription: String
+	txHash: String!
+	chainId: Int!
+	createdAt: DateTime!
+
+	# Relations
+	pools: [Pool!]! @derivedFrom(field: "project")
+	ownerDetails: User!
+}
+
+type Pool @entity {
+	id: ID! # This is on-chain pool ID (yes, it's implicit af thanks to TypeORM constraint to have column called id)
+	address: String!
+	poolType: PoolType!
+	projectId: String!
+	txHash: String!
+	chainId: Int!
+	isListed: Boolean!
+
+	# Time tracking
+	startBlock: BigInt!
+	endBlock: BigInt!
+	startDate: DateTime!
+	endDate: DateTime!
+
+	# Token information
+	projectTokenAddress: String!
+	vAssetAddress: String!
+	nativeAssetAddress: String!
+
+	# Pool configuration
+	maxVAssetsPerStaker: BigInt!
+	ownerShareOfInterest: Int!
+
+	# Live stats
+	totalStaked: BigInt!
+	totalStakers: Int!
+
+	# Exchange rates
+	currentNativeExRate: BigInt!
+	cumulativeProjectExRate: BigInt!
+
+	# APY information
+	stakerAPY: Float!
+	ownerAPY: Float!
+	platformAPY: Float!
+	combinedAPY: Float!
+
+	# Relations
+	project: Project!
+	stakes: [Stake!] @derivedFrom(field: "pool")
+	unstakes: [Unstake!] @derivedFrom(field: "pool")
+	emissionRates: [EmissionRate!] @derivedFrom(field: "pool")
+	nativeRateSnapshots: [NativeExchangeRateSnapshot!]
+		@derivedFrom(field: "pool")
+	projectRateSnapshots: [ProjectExchangeRateSnapshot!]
+		@derivedFrom(field: "pool")
+
+	createdAt: DateTime!
+	updatedAt: DateTime!
+}
+
+type User @entity {
+	id: ID! # This is on-chain user address (yes, it's implicit af thanks to TypeORM constraint to have column called id)
+	firstSeen: DateTime!
+	lastActive: DateTime!
+
+	# Relations
+	stakes: [Stake!] @derivedFrom(field: "user")
+	unstakes: [Unstake!] @derivedFrom(field: "user")
+	ownedProjects: [Project!] @derivedFrom(field: "ownerDetails")
+
+	# User stats
+	totalPoolsParticipated: Int!
+	totalStaked: BigInt!
+}
+
+type EmissionRate @entity {
+	id: ID!
+	poolId: String!
+	changeBlock: BigInt!
+	changeDate: DateTime!
+	emissionRate: BigInt!
+
+	# Relations
+	pool: Pool!
+}
+
+type NativeExchangeRateSnapshot @entity {
+	id: ID!
+	poolId: String!
+	timestamp: DateTime!
+	blockNumber: BigInt!
+	exchangeRate: BigInt!
+	avgGradient: BigInt!
+	sampleCount: Int!
+
+	# Relations
+	pool: Pool!
+}
+
+type ProjectExchangeRateSnapshot @entity {
+	id: ID!
+	poolId: String!
+	timestamp: DateTime!
+	blockNumber: BigInt!
+	cumulativeExchangeRate: BigInt!
+	pendingExchangeRate: BigInt!
+
+	# Relations
+	pool: Pool!
+}
+
+type Stake @entity {
+	id: ID!
+	userAddress: String!
+	poolId: String!
+	amount: BigInt!
+	nativeAmount: BigInt!
+	blockNumber: BigInt!
+	timestamp: DateTime!
+	txHash: String!
+
+	# Exchange rates
+	nativeExchangeRate: BigInt!
+	cumulativeProjectExRate: BigInt!
+
+	# Relations
+	user: User!
+	pool: Pool!
+
+	createdAt: DateTime!
+}
+
+type Unstake @entity {
+	id: ID!
+	userAddress: String!
+	poolId: String!
+	amount: BigInt!
+	nativeAmount: BigInt!
+	claimedProjectTokens: BigInt!
+	blockNumber: BigInt!
+	timestamp: DateTime!
+	txHash: String!
+
+	# Exchange rates
+	nativeExchangeRate: BigInt!
+	cumulativeProjectExRate: BigInt!
+
+	# Relations
+	user: User!
+	pool: Pool!
+
+	createdAt: DateTime!
+}
+
+type InterestClaim @entity {
+	id: ID!
+	poolId: String!
+	claimType: ClaimType!
+	claimerAddress: String!
+	amount: BigInt!
+	blockNumber: BigInt!
+	timestamp: DateTime!
+	txHash: String!
+
+	createdAt: DateTime!
+}
+
+type PlatformStatistics @entity {
+	id: ID!
+	date: DateTime!
+	totalProjects: Int!
+	totalPools: Int!
+	uniqueUsers: Int!
+	dailyActiveUsers: Int!
+	totalStakedValue: BigInt!
+	totalTransactions: Int!
+}
+
+enum PoolType {
+	LAUNCHPOOL
+	LAUNCHPAD
+	VESTING
+	FARMING
+}
+
+enum ClaimType {
+	OWNER_INTEREST
+	PLATFORM_FEE
+}

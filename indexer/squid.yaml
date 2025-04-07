@@ -1,0 +1,21 @@
+manifestVersion: subsquid.io/v0.1
+name: defrost-data-indexer
+version: 1
+description: |-
+    Defrost Data Indexer
+
+build:
+
+deploy:
+    addons:
+        postgres:
+    processor:
+        cmd:
+            - node
+            - lib/main
+    api:
+        cmd:
+            - npx
+            - squid-graphql-server
+            - --dumb-served
+            - --dumb-schema

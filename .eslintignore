@@ -1,2 +1,3 @@
-subsquid/src/typegen-abi
-subquid/abi
+indexer/src/typegen-abi
+indexer/abi
+indexer/db

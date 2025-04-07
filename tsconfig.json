@@ -9,17 +9,19 @@
 		"module": "CommonJS",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
-		"incremental": true,
+		"incremental": false,
 		"declaration": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"emitDecoratorMetadata": true,
+		"rootDir": "./src",
 		"plugins": [],
 		"paths": {
-			"@/*": ["./*"]
+			// "@/*": ["./*"]
 		},
-		"outDir": "./dist"
+		"outDir": "indexer/lib"
 	},
-	"include": ["lib/**/*", "index.ts"],
-	"exclude": ["node_modules", "dist"]
+	// "include": ["common/**/*.ts", "src/**/*.ts"],
+	"include": ["src/**/*"]
+	// "exclude": ["node_modules", "lib"]
 }
