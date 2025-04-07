@@ -30,7 +30,7 @@ export class Pool {
 	id!: string;
 
 	@StringColumn_({ nullable: false })
-	address!: string;
+	poolAddress!: string;
 
 	@Column_("varchar", { length: 10, nullable: false })
 	poolType!: PoolType;
@@ -69,22 +69,10 @@ export class Pool {
 	nativeAssetAddress!: string;
 
 	@BigIntColumn_({ nullable: false })
-	maxVAssetsPerStaker!: bigint;
-
-	@IntColumn_({ nullable: false })
-	ownerShareOfInterest!: number;
-
-	@BigIntColumn_({ nullable: false })
 	totalStaked!: bigint;
 
 	@IntColumn_({ nullable: false })
 	totalStakers!: number;
-
-	@BigIntColumn_({ nullable: false })
-	currentNativeExRate!: bigint;
-
-	@BigIntColumn_({ nullable: false })
-	cumulativeProjectExRate!: bigint;
 
 	@FloatColumn_({ nullable: false })
 	stakerAPY!: number;
