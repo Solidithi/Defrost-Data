@@ -21,11 +21,6 @@ export const events = {
 			endBlock: p.uint128,
 		}
 	),
-	PoolListingChanged: event(
-		"0xe299b1e623b9cb64f17b20c9587144fb43b08fca4f85b1b30b98d645f653cfa0",
-		"PoolListingChanged(uint64,bool)",
-		{ projectId: indexed(p.uint64), isListed: indexed(p.bool) }
-	),
 };
 
 export class Contract extends ContractBase {}
@@ -33,7 +28,4 @@ export class Contract extends ContractBase {}
 /// Event types
 export type LaunchpoolCreatedEventArgs = EParams<
 	typeof events.LaunchpoolCreated
->;
-export type PoolListingChangedEventArgs = EParams<
-	typeof events.PoolListingChanged
 >;

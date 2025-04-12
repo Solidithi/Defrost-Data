@@ -32,8 +32,8 @@ export const functions = {
 		p.bytes32
 	),
 	createLaunchpool: fun(
-		"0xb7bf962b",
-		"createLaunchpool((uint64,uint256,address,address,uint128,uint128,uint256,uint128[],uint256[],bool))",
+		"0x7007ff24",
+		"createLaunchpool((uint64,uint256,address,address,uint128,uint128,uint256,uint128[],uint256[]))",
 		{
 			_params: p.struct({
 				projectId: p.uint64,
@@ -45,7 +45,6 @@ export const functions = {
 				maxVTokensPerStaker: p.uint256,
 				changeBlocks: p.array(p.uint128),
 				emissionRateChanges: p.array(p.uint256),
-				isListed: p.bool,
 			}),
 		},
 		p.uint64
@@ -68,7 +67,6 @@ export const functions = {
 			poolType: p.uint8,
 			poolAddress: p.address,
 			projectId: p.uint64,
-			isListed: p.bool,
 		}
 	),
 	projects: viewFun(
