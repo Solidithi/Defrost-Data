@@ -1,18 +1,41 @@
 {
-  "name": "defrost-database",
+  "name": "defrost-db",
   "version": "1.0.0",
+  "description": "Database client for Defrost protocol",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*",
+    "prisma/**/*"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "postinstall": "prisma generate",
     "start": "node lib/index.js",
     "lint": "eslint src --ext .ts,.js",
     "format": "prettier --write \"src/**/*.{ts,js,json}\""
   },
   "dependencies": {
-    "prisma": "^6.6.0"
+    "@prisma/client": "^6.6.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "prisma": "^6.6.0",
     "typescript": "^4.8.0"
-  }
+  },
+  "peerDependencies": {
+    "prisma": "^6.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/defrost-db.git"
+  },
+  "keywords": [
+    "defrost",
+    "database",
+    "prisma"
+  ],
+  "author": "",
+  "license": "MIT"
 }
