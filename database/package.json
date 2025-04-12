@@ -9,12 +9,10 @@
     "format": "prettier --write \"src/**/*.{ts,js,json}\""
   },
   "dependencies": {
-    "typeorm": "^0.3.0",
-    "reflect-metadata": "^0.1.13",
-    "pg": "^8.9.0"
+    "prisma": "^6.6.0"
   },
   "devDependencies": {
-    "typescript": "^4.8.0",
-    "@types/node": "^18.0.0"
+    "@types/node": "^18.0.0",
+    "typescript": "^4.8.0"
   }
 }
