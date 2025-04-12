@@ -25,7 +25,6 @@ type Pool @entity {
 	projectId: String!
 	txHash: String!
 	chainId: Int!
-	isListed: Boolean!
 
 	# Time tracking
 	startBlock: BigInt!

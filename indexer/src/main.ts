@@ -227,7 +227,6 @@ async function handleLaunchpoolCreated(
 			txHash: log.getTransaction().hash,
 			projectId: launchpoolCreated.projectId.toString(),
 			poolAddress: launchpoolCreated.poolAddress.toString(),
-			isListed: true, // for now (soon refactor)
 			poolType: PoolType.LAUNCHPOOL,
 
 			// Time tracking
