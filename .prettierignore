@@ -3,3 +3,10 @@ dist
 package-lock.json
 pnpm-lock.yaml
 package.json
+
+# Ignore files in indexer/ sub-repo
+indexer/src/typegen-abi
+indexer/src/model
+indexer/abi
+
+# Ignore files in database/ sub-repo
