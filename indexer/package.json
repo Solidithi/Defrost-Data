@@ -5,8 +5,9 @@
   "scripts": {
 		"build": "tsc",
     "start": "node lib/main.js",
-		"gen:abi": "npx squid-evm-typegen src/typegen-abi ./abi/*",
-		"gen:typeorm": "npx squid-typeorm-codegen && npx squid-typeorm-migration generate && npx squid-typeorm-migration apply",
+		"abi:gen": "npx squid-evm-typegen src/typegen-abi ./abi/*",
+		"typeorm:gen": "squid-typeorm-codegen && squid-typeorm-migration generate",
+		"typeorm:migrate": "squid-typeorm-migration apply",
     "lint": "eslint src --ext .ts,.js",
     "format": "prettier --write \"src/**/*.{ts,js,json}\""
   },
