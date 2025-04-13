@@ -3,43 +3,33 @@ import { EvmBatchProcessor } from "@subsquid/evm-processor";
 import { User, Project, Pool, PoolType } from "./model/generated";
 import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
 import { BlockData, Log, DataHandlerContext } from "@subsquid/evm-processor";
+import { chains } from "./constants";
 import { ethers } from "ethers";
 import * as projectLibraryAbi from "./typegen-abi/ProjectLibrary";
 import * as launchpoolLibraryAbi from "./typegen-abi/LaunchpoolLibrary";
 import "dotenv/config";
 
-const CHAIN_ID = 1287; // Moonbase Alpha testnet
-const BLOCK_TIME = 6; // For Moonbase Alpha
+const chainName = "moonbase_alpha";
+const chain = chains[chainName];
 
-const config = {
-	ethereum: {
-		squidGateway: "https://v2.archive.subsquid.io/network/ethereum-mainnet",
-		rpc: "https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY",
-	},
-	moonbase_alpha: {
-		squidGateway: "https://v2.archive.subsquid.io/network/moonbase-testnet",
-		rpc: "https://rpc.api.moonbase.moonbeam.network",
-	},
-	sepolia: {
-		squidGateway: "",
-		rpc: "",
-	},
-};
-
-type Network = "moonbase_alpha" | "ethereum" | "sepolia";
-const network: Network = "moonbase_alpha";
-
-const provider = new ethers.providers.JsonRpcProvider(config[network].rpc);
+const provider = new ethers.providers.JsonRpcProvider(chain.rpc);
 
 // Squid DB for handling indexer's internal stats such as indexer health, etc.
 const squidDb = new TypeormDatabase({
 	stateSchema: "squid_processor",
 });
 
+if (!chain.contracts.ProjectHubUpgradeableProxy) {
+	throw new Error(
+		"ProjectHubUpgradeableProxy contract address not found for chain " +
+			chainName
+	);
+}
+
 const processor = new EvmBatchProcessor()
-	.setGateway(config[network].squidGateway)
+	.setGateway(chain.squidGateway)
 	.setRpcEndpoint({
-		url: config[network].rpc,
+		url: chain.rpc,
 		rateLimit: 10,
 	})
 	.setBlockRange({
@@ -47,12 +37,12 @@ const processor = new EvmBatchProcessor()
 	})
 	.setFinalityConfirmation(10) // 6 seconds confirmation time
 	.addLog({
-		address: ["0x2CD45db1754b74dddbE42F742BB10B70D0AC7819".toLowerCase()], // ProjectHubProjeUpgradable Proxy contract
+		address: [chain.contracts!.ProjectHubUpgradeableProxy], // ProjectHubProjeUpgradable Proxy contract
 		topic0: [projectLibraryAbi.events.ProjectCreated.topic],
 		transaction: true,
 	})
 	.addLog({
-		address: ["0x2CD45db1754b74dddbE42F742BB10B70D0AC7819".toLowerCase()], // ProjectHubProjeUpgradable Proxy contract
+		address: [chain.contracts!.ProjectHubUpgradeableProxy], // ProjectHubProjeUpgradable Proxy contract
 		topic0: [launchpoolLibraryAbi.events.LaunchpoolCreated.topic],
 		transaction: true,
 	});
@@ -137,7 +127,7 @@ async function handleProjectCreated(
 		projects.push(
 			new Project({
 				id: projectId.toString(),
-				chainId: CHAIN_ID,
+				chainId: chain.chainId,
 				projectOwner: projectOwner.toString(),
 				createdAt: new Date(log.block.timestamp),
 				txHash: log.getTransaction().hash,
@@ -214,7 +204,7 @@ async function handleLaunchpoolCreated(
 }> {
 	const secondsBetweenBlocks = (from: number, to: number): number => {
 		const signedBlockDelta = from - to;
-		return signedBlockDelta * BLOCK_TIME;
+		return signedBlockDelta * chain.blockTime;
 	};
 
 	const pools: Pool[] = pendingLogs.map((log) => {
@@ -223,7 +213,7 @@ async function handleLaunchpoolCreated(
 
 		return new Pool({
 			id: launchpoolCreated.poolId.toString(),
-			chainId: CHAIN_ID,
+			chainId: chain.blockTime,
 			txHash: log.getTransaction().hash,
 			projectId: launchpoolCreated.projectId.toString(),
 			poolAddress: launchpoolCreated.poolAddress.toString(),
