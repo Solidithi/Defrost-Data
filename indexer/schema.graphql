@@ -14,14 +14,13 @@ type Project @entity {
 	createdAt: DateTime!
 
 	# Relations
-	pools: [Pool!]! @derivedFrom(field: "project")
+	launchpools: [Launchpool!]! @derivedFrom(field: "project")
 	ownerDetails: User!
 }
 
-type Pool @entity {
+type Launchpool @entity {
 	id: ID! # This is on-chain pool ID (yes, it's implicit af thanks to TypeORM constraint to have column called id)
 	poolAddress: String!
-	poolType: PoolType!
 	projectId: String!
 	txHash: String!
 	chainId: Int!
@@ -42,7 +41,7 @@ type Pool @entity {
 	# ownerShareOfInterest: Int!
 
 	# Live stats
-	totalStaked: BigInt!
+	totalStaked: BigInt! # Already in contract
 	totalStakers: Int!
 
 	# Exchange rates
@@ -57,13 +56,13 @@ type Pool @entity {
 
 	# Relations
 	project: Project!
-	stakes: [Stake!] @derivedFrom(field: "pool")
-	unstakes: [Unstake!] @derivedFrom(field: "pool")
-	emissionRates: [EmissionRate!] @derivedFrom(field: "pool")
-	nativeRateSnapshots: [NativeExchangeRateSnapshot!]
-		@derivedFrom(field: "pool")
-	projectRateSnapshots: [ProjectExchangeRateSnapshot!]
-		@derivedFrom(field: "pool")
+	stakes: [LaunchpoolStake!] @derivedFrom(field: "launchpool")
+	unstakes: [LaunchpoolUnstake!] @derivedFrom(field: "launchpool")
+	emissionRates: [LaunchpoolEmissionRate!] @derivedFrom(field: "launchpool") # Is this really needed?
+	nativeRateSnapshots: [LaunchpoolNativeExRateSnapshot!]
+		@derivedFrom(field: "launchpool")
+	projectRateSnapshots: [LaunchpoolProjectExRateSnapshot!]
+		@derivedFrom(field: "launchpool")
 
 	createdAt: DateTime!
 	updatedAt: DateTime!
@@ -75,16 +74,16 @@ type User @entity {
 	lastActive: DateTime!
 
 	# Relations
-	stakes: [Stake!] @derivedFrom(field: "user")
-	unstakes: [Unstake!] @derivedFrom(field: "user")
+	stakes: [LaunchpoolStake!] @derivedFrom(field: "user")
+	unstakes: [LaunchpoolUnstake!] @derivedFrom(field: "user")
 	ownedProjects: [Project!] @derivedFrom(field: "ownerDetails")
 
 	# User stats
 	totalPoolsParticipated: Int!
-	totalStaked: BigInt!
+	totalStaked: BigInt! # Is this really needed? We have totalStaked in contract
 }
 
-type EmissionRate @entity {
+type LaunchpoolEmissionRate @entity {
 	id: ID!
 	poolId: String!
 	changeBlock: BigInt!
@@ -92,10 +91,10 @@ type EmissionRate @entity {
 	emissionRate: BigInt!
 
 	# Relations
-	pool: Pool!
+	launchpool: Launchpool!
 }
 
-type NativeExchangeRateSnapshot @entity {
+type LaunchpoolNativeExRateSnapshot @entity {
 	id: ID!
 	poolId: String!
 	timestamp: DateTime!
@@ -105,10 +104,10 @@ type NativeExchangeRateSnapshot @entity {
 	sampleCount: Int!
 
 	# Relations
-	pool: Pool!
+	launchpool: Launchpool!
 }
 
-type ProjectExchangeRateSnapshot @entity {
+type LaunchpoolProjectExRateSnapshot @entity {
 	id: ID!
 	poolId: String!
 	timestamp: DateTime!
@@ -117,15 +116,15 @@ type ProjectExchangeRateSnapshot @entity {
 	pendingExchangeRate: BigInt!
 
 	# Relations
-	pool: Pool!
+	launchpool: Launchpool!
 }
 
-type Stake @entity {
+type LaunchpoolStake @entity {
 	id: ID!
 	userAddress: String!
 	poolId: String!
 	amount: BigInt!
-	nativeAmount: BigInt!
+	nativeAmount: BigInt! # Already in contract
 	blockNumber: BigInt!
 	timestamp: DateTime!
 	txHash: String!
@@ -136,12 +135,12 @@ type Stake @entity {
 
 	# Relations
 	user: User!
-	pool: Pool!
+	launchpool: Launchpool!
 
 	createdAt: DateTime!
 }
 
-type Unstake @entity {
+type LaunchpoolUnstake @entity {
 	id: ID!
 	userAddress: String!
 	poolId: String!
@@ -158,15 +157,15 @@ type Unstake @entity {
 
 	# Relations
 	user: User!
-	pool: Pool!
+	launchpool: Launchpool!
 
 	createdAt: DateTime!
 }
 
-type InterestClaim @entity {
+type LaunchpoolInterestClaim @entity {
 	id: ID!
 	poolId: String!
-	claimType: ClaimType!
+	claimType: LaunchpoolClaimType!
 	claimerAddress: String!
 	amount: BigInt!
 	blockNumber: BigInt!
@@ -176,7 +175,7 @@ type InterestClaim @entity {
 	createdAt: DateTime!
 }
 
-type PlatformStatistics @entity {
+type LaunchpoolPlatformStatistics @entity {
 	id: ID!
 	date: DateTime!
 	totalProjects: Int!
@@ -187,14 +186,14 @@ type PlatformStatistics @entity {
 	totalTransactions: Int!
 }
 
-enum PoolType {
-	LAUNCHPOOL
-	LAUNCHPAD
-	VESTING
-	FARMING
-}
+# enum PoolType {
+# 	LAUNCHPOOL
+# 	LAUNCHPAD
+# 	VESTING
+# 	FARMING
+# }
 
-enum ClaimType {
+enum LaunchpoolClaimType {
 	OWNER_INTEREST
 	PLATFORM_FEE
 }
