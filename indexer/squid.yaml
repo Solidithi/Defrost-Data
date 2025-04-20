@@ -5,17 +5,24 @@ description: |-
     Defrost Data Indexer
 
 build:
-
+    node_version: 20
+    package_manager: pnpm,
+    cmd:
+        - pnpm
+        - install
 deploy:
     addons:
         postgres:
     processor:
         cmd:
-            - node
-            - lib/main
+            ["sqd", "process:prod"]
+            # - node
+            # - lib/main
     api:
         cmd:
-            - npx
-            - squid-graphql-server
-            - --dumb-served
-            - --dumb-schema
+            ["sqd", "serve:prod"]
+            # cmd:
+            # - npx
+            # - squid-graphql-server
+            # - --dumb-served
+            # - --dumb-schema
