@@ -34,8 +34,7 @@ type Launchpool @entity {
 	# Token information
 	projectTokenAddress: String!
 	vAssetAddress: String!
-	nativeAssetAddress: String!
-
+	nativeAssetAddress: String! # Is this really needed?
 	# Pool configuration
 	# maxVAssetsPerStaker: BigInt!
 	# ownerShareOfInterest: Int!
@@ -80,7 +79,7 @@ type User @entity {
 
 	# User stats
 	totalPoolsParticipated: Int!
-	totalStaked: BigInt! # Is this really needed? We have totalStaked in contract
+	totalStaked: BigInt! # Is this really needed? We have totalStaked in contract, plus it can be problematic since we have multiple types of pools, each with different currencies/tokens
 }
 
 type LaunchpoolEmissionRate @entity {
@@ -175,7 +174,7 @@ type LaunchpoolInterestClaim @entity {
 	createdAt: DateTime!
 }
 
-type LaunchpoolPlatformStatistics @entity {
+type PlatformStatistics @entity {
 	id: ID!
 	date: DateTime!
 	totalProjects: Int!

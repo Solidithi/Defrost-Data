@@ -1,0 +1,183 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DB_URL")
+}
+
+model launchpool {
+    id                                  String                                @id(map: "PK_901f124077fb71d351b6b4e883b") @db.VarChar
+    pool_address                        String
+    project_id                          String                                @db.VarChar
+    tx_hash                             String
+    chain_id                            Int
+    start_block                         Decimal                               @db.Decimal
+    end_block                           Decimal                               @db.Decimal
+    start_date                          DateTime                              @db.Timestamptz(6)
+    end_date                            DateTime                              @db.Timestamptz(6)
+    project_token_address               String
+    v_asset_address                     String
+    native_asset_address                String
+    total_staked                        Decimal                               @db.Decimal
+    total_stakers                       Int
+    staker_apy                          Decimal                               @db.Decimal
+    owner_apy                           Decimal                               @db.Decimal
+    platform_apy                        Decimal                               @db.Decimal
+    combined_apy                        Decimal                               @db.Decimal
+    created_at                          DateTime                              @db.Timestamptz(6)
+    updated_at                          DateTime                              @db.Timestamptz(6)
+    project                             project                               @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e0adb6bb4df5fcacfe76c9e944a")
+    launchpool_emission_rate            launchpool_emission_rate[]
+    launchpool_native_ex_rate_snapshot  launchpool_native_ex_rate_snapshot[]
+    launchpool_project_ex_rate_snapshot launchpool_project_ex_rate_snapshot[]
+    launchpool_stake                    launchpool_stake[]
+    launchpool_unstake                  launchpool_unstake[]
+
+    @@index([project_id], map: "IDX_e0adb6bb4df5fcacfe76c9e944")
+}
+
+model launchpool_emission_rate {
+    id            String      @id(map: "PK_38472c23c797a7e136f274865fe") @db.VarChar
+    pool_id       String
+    change_block  Decimal     @db.Decimal
+    change_date   DateTime    @db.Timestamptz(6)
+    emission_rate Decimal     @db.Decimal
+    launchpool_id String?     @db.VarChar
+    launchpool    launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_5ab70405fc2d5f0d67eeee10ead")
+
+    @@index([launchpool_id], map: "IDX_5ab70405fc2d5f0d67eeee10ea")
+}
+
+model launchpool_interest_claim {
+    id              String   @id(map: "PK_8e9af7d28c210f651818c3edc67") @db.VarChar
+    pool_id         String
+    claim_type      String   @db.VarChar(14)
+    claimer_address String
+    amount          Decimal  @db.Decimal
+    block_number    Decimal  @db.Decimal
+    timestamp       DateTime @db.Timestamptz(6)
+    tx_hash         String
+    created_at      DateTime @db.Timestamptz(6)
+}
+
+model launchpool_native_ex_rate_snapshot {
+    id            String      @id(map: "PK_dd7610d63abfb47540ab262e57f") @db.VarChar
+    pool_id       String
+    timestamp     DateTime    @db.Timestamptz(6)
+    block_number  Decimal     @db.Decimal
+    exchange_rate Decimal     @db.Decimal
+    avg_gradient  Decimal     @db.Decimal
+    sample_count  Int
+    launchpool_id String?     @db.VarChar
+    launchpool    launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d644baf226133c3eafa016b85c6")
+
+    @@index([launchpool_id], map: "IDX_d644baf226133c3eafa016b85c")
+}
+
+model launchpool_project_ex_rate_snapshot {
+    id                       String      @id(map: "PK_2001c62e364c91911dace26a392") @db.VarChar
+    pool_id                  String
+    timestamp                DateTime    @db.Timestamptz(6)
+    block_number             Decimal     @db.Decimal
+    cumulative_exchange_rate Decimal     @db.Decimal
+    pending_exchange_rate    Decimal     @db.Decimal
+    launchpool_id            String?     @db.VarChar
+    launchpool               launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f089a275a776b3bbcb76b598b69")
+
+    @@index([launchpool_id], map: "IDX_f089a275a776b3bbcb76b598b6")
+}
+
+model launchpool_stake {
+    id                         String      @id(map: "PK_c8f1b177a4792a3944a19e801cd") @db.VarChar
+    user_address               String
+    pool_id                    String
+    amount                     Decimal     @db.Decimal
+    native_amount              Decimal     @db.Decimal
+    block_number               Decimal     @db.Decimal
+    timestamp                  DateTime    @db.Timestamptz(6)
+    tx_hash                    String
+    native_exchange_rate       Decimal     @db.Decimal
+    cumulative_project_ex_rate Decimal     @db.Decimal
+    created_at                 DateTime    @db.Timestamptz(6)
+    user_id                    String?     @db.VarChar
+    launchpool_id              String?     @db.VarChar
+    launchpool                 launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_23117e8789fcd54d325404f13b8")
+    user                       user?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_ef9ac0e83cf6a94667428dc537d")
+
+    @@index([launchpool_id], map: "IDX_23117e8789fcd54d325404f13b")
+    @@index([user_id], map: "IDX_ef9ac0e83cf6a94667428dc537")
+}
+
+model launchpool_unstake {
+    id                         String      @id(map: "PK_82fb058b1ab00db097f47d2a6b0") @db.VarChar
+    user_address               String
+    pool_id                    String
+    amount                     Decimal     @db.Decimal
+    native_amount              Decimal     @db.Decimal
+    claimed_project_tokens     Decimal     @db.Decimal
+    block_number               Decimal     @db.Decimal
+    timestamp                  DateTime    @db.Timestamptz(6)
+    tx_hash                    String
+    native_exchange_rate       Decimal     @db.Decimal
+    cumulative_project_ex_rate Decimal     @db.Decimal
+    created_at                 DateTime    @db.Timestamptz(6)
+    user_id                    String?     @db.VarChar
+    launchpool_id              String?     @db.VarChar
+    user                       user?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_45ac69b00417b3e04fb04feb0d9")
+    launchpool                 launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_5ffd534f5829b4c756e48a0727e")
+
+    @@index([user_id], map: "IDX_45ac69b00417b3e04fb04feb0d")
+    @@index([launchpool_id], map: "IDX_5ffd534f5829b4c756e48a0727")
+}
+
+model migrations {
+    id        Int    @id(map: "PK_8c82d7f526340ab734260ea46be") @default(autoincrement())
+    timestamp BigInt
+    name      String @db.VarChar
+}
+
+model platform_statistics {
+    id                 String   @id(map: "PK_4416a2d6a3a4ec1260e13337020") @db.VarChar
+    date               DateTime @db.Timestamptz(6)
+    total_projects     Int
+    total_pools        Int
+    unique_users       Int
+    daily_active_users Int
+    total_staked_value Decimal  @db.Decimal
+    total_transactions Int
+}
+
+model project {
+    id                String       @id(map: "PK_4d68b1358bb5b766d3e78f32f57") @db.VarChar
+    name              String?
+    project_owner     String
+    token_address     String?
+    token_symbol      String?
+    token_decimals    Int?
+    logo              String?
+    images            String[]
+    short_description String?
+    long_description  String?
+    tx_hash           String
+    chain_id          Int
+    created_at        DateTime     @db.Timestamptz(6)
+    owner_details_id  String?      @db.VarChar
+    launchpool        launchpool[]
+    user              user?        @relation(fields: [owner_details_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_b9153c3bb5596ec4bf8352bdfc7")
+
+    @@index([owner_details_id], map: "IDX_b9153c3bb5596ec4bf8352bdfc")
+}
+
+model user {
+    id                       String               @id(map: "PK_cace4a159ff9f2512dd42373760") @db.VarChar
+    first_seen               DateTime             @db.Timestamptz(6)
+    last_active              DateTime             @db.Timestamptz(6)
+    total_pools_participated Int
+    total_staked             Decimal              @db.Decimal
+    launchpool_stake         launchpool_stake[]
+    launchpool_unstake       launchpool_unstake[]
+    project                  project[]
+}

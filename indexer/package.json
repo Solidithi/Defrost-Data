@@ -12,6 +12,7 @@
     "format": "prettier --write \"src/**/*.{ts,js,json}\""
   },
   "dependencies": {
+    "@prisma/client": "^6.6.0",
     "@subsquid/evm-abi": "^0.3.1",
     "@subsquid/evm-codec": "^0.3.0",
     "@subsquid/evm-processor": "^1.27.1",
