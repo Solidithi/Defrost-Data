@@ -1,9 +1,14 @@
 services:
     db:
         image: postgres:15
-        platform: linux/amd64 # Or linux/arm64 if on ARM
+        platform: linux/amd64
         environment:
             POSTGRES_DB: "squidfrost"
             POSTGRES_PASSWORD: postgres
         ports:
             - "5432:5432"
+    redis:
+        image: redis:7
+        platform: linux/amd64
+        ports:
+            - "6379:6379"

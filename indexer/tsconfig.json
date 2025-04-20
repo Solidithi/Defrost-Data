@@ -6,6 +6,7 @@
 		"target": "es2020",
 		"strict": false,
 		"esModuleInterop": true,
+		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
