@@ -1,4 +1,4 @@
 import { ethers } from "ethers";
-import { selectedChain } from "./selected-chain";
+import { selectedChain } from "../config/chains";
 
 export const ethersProvider = new ethers.JsonRpcProvider(selectedChain.rpc);
