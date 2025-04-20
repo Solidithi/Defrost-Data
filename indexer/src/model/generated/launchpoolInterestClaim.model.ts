@@ -1,9 +1,9 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
-import {ClaimType} from "./_claimType"
+import {LaunchpoolClaimType} from "./_launchpoolClaimType"
 
 @Entity_()
-export class InterestClaim {
-    constructor(props?: Partial<InterestClaim>) {
+export class LaunchpoolInterestClaim {
+    constructor(props?: Partial<LaunchpoolInterestClaim>) {
         Object.assign(this, props)
     }
 
@@ -14,7 +14,7 @@ export class InterestClaim {
     poolId!: string
 
     @Column_("varchar", {length: 14, nullable: false})
-    claimType!: ClaimType
+    claimType!: LaunchpoolClaimType
 
     @StringColumn_({nullable: false})
     claimerAddress!: string

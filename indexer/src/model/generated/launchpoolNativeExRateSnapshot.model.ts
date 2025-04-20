@@ -1,9 +1,9 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
-import {Pool} from "./pool.model"
+import {Launchpool} from "./launchpool.model"
 
 @Entity_()
-export class NativeExchangeRateSnapshot {
-    constructor(props?: Partial<NativeExchangeRateSnapshot>) {
+export class LaunchpoolNativeExRateSnapshot {
+    constructor(props?: Partial<LaunchpoolNativeExRateSnapshot>) {
         Object.assign(this, props)
     }
 
@@ -29,6 +29,6 @@ export class NativeExchangeRateSnapshot {
     sampleCount!: number
 
     @Index_()
-    @ManyToOne_(() => Pool, {nullable: true})
-    pool!: Pool
+    @ManyToOne_(() => Launchpool, {nullable: true})
+    launchpool!: Launchpool
 }

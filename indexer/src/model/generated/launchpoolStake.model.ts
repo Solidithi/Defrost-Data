@@ -1,10 +1,10 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
 import {User} from "./user.model"
-import {Pool} from "./pool.model"
+import {Launchpool} from "./launchpool.model"
 
 @Entity_()
-export class Unstake {
-    constructor(props?: Partial<Unstake>) {
+export class LaunchpoolStake {
+    constructor(props?: Partial<LaunchpoolStake>) {
         Object.assign(this, props)
     }
 
@@ -22,9 +22,6 @@ export class Unstake {
 
     @BigIntColumn_({nullable: false})
     nativeAmount!: bigint
-
-    @BigIntColumn_({nullable: false})
-    claimedProjectTokens!: bigint
 
     @BigIntColumn_({nullable: false})
     blockNumber!: bigint
@@ -46,8 +43,8 @@ export class Unstake {
     user!: User
 
     @Index_()
-    @ManyToOne_(() => Pool, {nullable: true})
-    pool!: Pool
+    @ManyToOne_(() => Launchpool, {nullable: true})
+    launchpool!: Launchpool
 
     @DateTimeColumn_({nullable: false})
     createdAt!: Date

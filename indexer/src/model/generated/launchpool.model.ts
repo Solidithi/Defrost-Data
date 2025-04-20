@@ -1,15 +1,14 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, FloatColumn as FloatColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "@subsquid/typeorm-store"
-import {PoolType} from "./_poolType"
 import {Project} from "./project.model"
-import {Stake} from "./stake.model"
-import {Unstake} from "./unstake.model"
-import {EmissionRate} from "./emissionRate.model"
-import {NativeExchangeRateSnapshot} from "./nativeExchangeRateSnapshot.model"
-import {ProjectExchangeRateSnapshot} from "./projectExchangeRateSnapshot.model"
+import {LaunchpoolStake} from "./launchpoolStake.model"
+import {LaunchpoolUnstake} from "./launchpoolUnstake.model"
+import {LaunchpoolEmissionRate} from "./launchpoolEmissionRate.model"
+import {LaunchpoolNativeExRateSnapshot} from "./launchpoolNativeExRateSnapshot.model"
+import {LaunchpoolProjectExRateSnapshot} from "./launchpoolProjectExRateSnapshot.model"
 
 @Entity_()
-export class Pool {
-    constructor(props?: Partial<Pool>) {
+export class Launchpool {
+    constructor(props?: Partial<Launchpool>) {
         Object.assign(this, props)
     }
 
@@ -18,9 +17,6 @@ export class Pool {
 
     @StringColumn_({nullable: false})
     poolAddress!: string
-
-    @Column_("varchar", {length: 10, nullable: false})
-    poolType!: PoolType
 
     @StringColumn_({nullable: false})
     projectId!: string
@@ -74,20 +70,20 @@ export class Pool {
     @ManyToOne_(() => Project, {nullable: true})
     project!: Project
 
-    @OneToMany_(() => Stake, e => e.pool)
-    stakes!: Stake[]
+    @OneToMany_(() => LaunchpoolStake, e => e.launchpool)
+    stakes!: LaunchpoolStake[]
 
-    @OneToMany_(() => Unstake, e => e.pool)
-    unstakes!: Unstake[]
+    @OneToMany_(() => LaunchpoolUnstake, e => e.launchpool)
+    unstakes!: LaunchpoolUnstake[]
 
-    @OneToMany_(() => EmissionRate, e => e.pool)
-    emissionRates!: EmissionRate[]
+    @OneToMany_(() => LaunchpoolEmissionRate, e => e.launchpool)
+    emissionRates!: LaunchpoolEmissionRate[]
 
-    @OneToMany_(() => NativeExchangeRateSnapshot, e => e.pool)
-    nativeRateSnapshots!: NativeExchangeRateSnapshot[]
+    @OneToMany_(() => LaunchpoolNativeExRateSnapshot, e => e.launchpool)
+    nativeRateSnapshots!: LaunchpoolNativeExRateSnapshot[]
 
-    @OneToMany_(() => ProjectExchangeRateSnapshot, e => e.pool)
-    projectRateSnapshots!: ProjectExchangeRateSnapshot[]
+    @OneToMany_(() => LaunchpoolProjectExRateSnapshot, e => e.launchpool)
+    projectRateSnapshots!: LaunchpoolProjectExRateSnapshot[]
 
     @DateTimeColumn_({nullable: false})
     createdAt!: Date

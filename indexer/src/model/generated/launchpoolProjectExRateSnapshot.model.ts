@@ -1,9 +1,9 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
-import {Pool} from "./pool.model"
+import {Launchpool} from "./launchpool.model"
 
 @Entity_()
-export class ProjectExchangeRateSnapshot {
-    constructor(props?: Partial<ProjectExchangeRateSnapshot>) {
+export class LaunchpoolProjectExRateSnapshot {
+    constructor(props?: Partial<LaunchpoolProjectExRateSnapshot>) {
         Object.assign(this, props)
     }
 
@@ -26,6 +26,6 @@ export class ProjectExchangeRateSnapshot {
     pendingExchangeRate!: bigint
 
     @Index_()
-    @ManyToOne_(() => Pool, {nullable: true})
-    pool!: Pool
+    @ManyToOne_(() => Launchpool, {nullable: true})
+    launchpool!: Launchpool
 }

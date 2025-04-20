@@ -1,6 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, DateTimeColumn as DateTimeColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
-import {Stake} from "./stake.model"
-import {Unstake} from "./unstake.model"
+import {LaunchpoolStake} from "./launchpoolStake.model"
+import {LaunchpoolUnstake} from "./launchpoolUnstake.model"
 import {Project} from "./project.model"
 
 @Entity_()
@@ -18,11 +18,11 @@ export class User {
     @DateTimeColumn_({nullable: false})
     lastActive!: Date
 
-    @OneToMany_(() => Stake, e => e.user)
-    stakes!: Stake[]
+    @OneToMany_(() => LaunchpoolStake, e => e.user)
+    stakes!: LaunchpoolStake[]
 
-    @OneToMany_(() => Unstake, e => e.user)
-    unstakes!: Unstake[]
+    @OneToMany_(() => LaunchpoolUnstake, e => e.user)
+    unstakes!: LaunchpoolUnstake[]
 
     @OneToMany_(() => Project, e => e.ownerDetails)
     ownedProjects!: Project[]

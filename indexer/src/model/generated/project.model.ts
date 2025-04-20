@@ -1,5 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, OneToMany as OneToMany_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
-import {Pool} from "./pool.model"
+import {Launchpool} from "./launchpool.model"
 import {User} from "./user.model"
 
 @Entity_()
@@ -47,8 +47,8 @@ export class Project {
     @DateTimeColumn_({nullable: false})
     createdAt!: Date
 
-    @OneToMany_(() => Pool, e => e.project)
-    pools!: Pool[]
+    @OneToMany_(() => Launchpool, e => e.project)
+    launchpools!: Launchpool[]
 
     @Index_()
     @ManyToOne_(() => User, {nullable: true})

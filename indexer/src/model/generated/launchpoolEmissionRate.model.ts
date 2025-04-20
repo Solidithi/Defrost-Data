@@ -1,9 +1,9 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
-import {Pool} from "./pool.model"
+import {Launchpool} from "./launchpool.model"
 
 @Entity_()
-export class EmissionRate {
-    constructor(props?: Partial<EmissionRate>) {
+export class LaunchpoolEmissionRate {
+    constructor(props?: Partial<LaunchpoolEmissionRate>) {
         Object.assign(this, props)
     }
 
@@ -23,6 +23,6 @@ export class EmissionRate {
     emissionRate!: bigint
 
     @Index_()
-    @ManyToOne_(() => Pool, {nullable: true})
-    pool!: Pool
+    @ManyToOne_(() => Launchpool, {nullable: true})
+    launchpool!: Launchpool
 }
