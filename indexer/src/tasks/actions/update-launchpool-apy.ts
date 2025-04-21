@@ -1,4 +1,4 @@
-import { ContractTransactionReceipt, ethers } from "ethers";
+import { ethers } from "ethers";
 import { prismaClient, logger, ethersProvider } from "../../singletons";
 import { selectedChain } from "../../config";
 import { abi as launchpoolABI } from "../../../abi/Launchpool.json";
@@ -6,9 +6,9 @@ import { abi as IERC20MetadataABI } from "../../../abi/IERC20Metadata.json";
 import { normalizeAddress } from "../../utils";
 
 export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
-	poolAddress = normalizeAddress(poolAddress);
+	const normalizedPoolAddress = normalizeAddress(poolAddress);
 
-	console.debug("Pool address is: ", poolAddress);
+	console.debug("Pool address is: ", normalizedPoolAddress);
 	console.debug("Ethers provider is: ", ethersProvider);
 
 	console.log("Fetching total staked and project token address from DB");
@@ -16,9 +16,9 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 		total_staked: totalNativeStaked,
 		project_token_address: projectTokenAddr,
 		native_asset_address: nativeTokenAddr,
-	} = await prismaClient.launchpool.findFirst({
+	} = await prismaClient.launchpool.findUnique({
 		where: {
-			pool_address: poolAddress,
+			id: normalizedPoolAddress,
 		},
 		select: {
 			total_staked: true,
@@ -29,23 +29,23 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 
 	if (!totalNativeStaked) {
 		throw new Error(
-			`Pool ${poolAddress} not found in database. Cannot update APY.`
+			`Pool ${normalizedPoolAddress} not found in database. Cannot update APY.`
 		);
 	}
 	if (!projectTokenAddr) {
 		throw new Error(
-			`Project token address not found for pool ${poolAddress}. Cannot update APY.`
+			`Project token address not found for pool ${normalizedPoolAddress}. Cannot update APY.`
 		);
 	}
 	if (!nativeTokenAddr) {
 		throw new Error(
-			`Native token address not found for pool ${poolAddress}. Cannot update APY.`
+			`Native token address not found for pool ${normalizedPoolAddress}. Cannot update APY.`
 		);
 	}
 
 	console.log("Initializing contract instances:... ");
 	const launchpoolContract = new ethers.Contract(
-		poolAddress,
+		normalizedPoolAddress,
 		launchpoolABI,
 		ethersProvider
 	);
@@ -60,7 +60,7 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 	const pTokenDecimals = Number(await pTokenMetadataContract.decimals());
 	if (!pTokenDecimals) {
 		throw new Error(
-			`Project token decimals not found for pool ${poolAddress}. Cannot update APY.`
+			`Project token decimals not found for pool ${normalizedPoolAddress}. Cannot update APY.`
 		);
 	}
 	console.log("Project token decimals:", pTokenDecimals);
@@ -72,7 +72,7 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 
 	if (!nativeTokenDecimals) {
 		throw new Error(
-			`Native token decimals not found for pool ${poolAddress}. Cannot update APY.`
+			`Native token decimals not found for pool ${normalizedPoolAddress}. Cannot update APY.`
 		);
 	}
 	console.log("Native token decimals:", nativeTokenDecimals);
@@ -95,15 +95,15 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 	logger.info(`Is trace level enabled: ${logger.isLevelEnabled("trace")}`);
 	logger.info(`New APY: ${newAPY}%`);
 
-	const affected = await prismaClient.launchpool.updateMany({
+	const affected = await prismaClient.launchpool.update({
 		data: {
 			staker_apy: newAPY,
 		},
 		where: {
-			pool_address: poolAddress,
+			id: normalizedPoolAddress,
 		},
 	});
-	console.log(`Updated ${affected.count} rows in launchpool for new APY`);
+	console.log(`Updated ${affected ? 1 : 0} rows in launchpool for new APY`);
 }
 
 function calcProjectTokenAPY(

@@ -1,16 +1,8 @@
 import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { LaunchpoolStake, User, Launchpool } from "../model/generated";
-import {
-	// ethersProvider,
-	cacheStore,
-	logger,
-	// prismaClient,
-} from "../singletons";
-import * as launchpoolAbi from "../typegen-abi/Launchpool";
-// import { parseUnits, formatUnits } from "ethers/lib/utils";
-// import { abi as launchpoolABI } from "../../abi/Launchpool.json";
-// import { ethers } from "ethers";
+import { cacheStore, logger } from "../singletons";
+import * as launchpoolABI from "../typegen-abi/Launchpool";
 import { scheduleOnce } from "../tasks";
 import { updateLaunchpoolAPY } from "../tasks/actions";
 import { In } from "typeorm";
@@ -30,7 +22,7 @@ export async function handleLaunchpoolStake(
 			string,
 			{
 				log: Log;
-				event: ReturnType<typeof launchpoolAbi.events.Staked.decode>;
+				event: ReturnType<typeof launchpoolABI.events.Staked.decode>;
 			}[]
 		>();
 
@@ -46,7 +38,7 @@ export async function handleLaunchpoolStake(
 			}
 
 			try {
-				const event = launchpoolAbi.events.Staked.decode(log);
+				const event = launchpoolABI.events.Staked.decode(log);
 
 				if (!stakesPerPool.has(poolAddress)) {
 					stakesPerPool.set(poolAddress, []);
@@ -65,6 +57,17 @@ export async function handleLaunchpoolStake(
 		logger.info(
 			`Log grouping complete: ${skippedLogsCount}/${pendingLogs.length} skipped (not in observed pools)`
 		);
+
+		if (skippedLogsCount === pendingLogs.length) {
+			logger.info("No logs to process, exiting...");
+			return {
+				topic0: launchpoolABI.events.Staked.topic,
+				success: true,
+				error: null,
+				unprocessedLogs: [],
+			};
+		}
+
 		logger.info(`Found stakes for ${stakesPerPool.size} different pools`);
 
 		// Process each pool's stakes in batch
@@ -81,11 +84,11 @@ export async function handleLaunchpoolStake(
 
 			// Fetch pool by poolAddress
 			logger.info(`Looking up pool by address: ${poolAddress}`);
-			const launchpool = await ctx.store.findOneBy(Launchpool, {
-				poolAddress,
+			const launchpoolToSave = await ctx.store.findOneBy(Launchpool, {
+				id: poolAddress,
 			});
 
-			if (!launchpool) {
+			if (!launchpoolToSave) {
 				logger.error(
 					`ERROR: Pool with address ${poolAddress} not found in database!`
 				);
@@ -99,7 +102,7 @@ export async function handleLaunchpoolStake(
 			}
 
 			logger.info(
-				`Found pool: ID=${launchpool.id}, ProjectID=${launchpool.projectId}`
+				`Found pool: ID=${launchpoolToSave.id}, ProjectID=${launchpoolToSave.projectId}`
 			);
 
 			// Group by user to count new stakers
@@ -109,7 +112,7 @@ export async function handleLaunchpoolStake(
 				{
 					logs: Log[];
 					events: ReturnType<
-						typeof launchpoolAbi.events.Staked.decode
+						typeof launchpoolABI.events.Staked.decode
 					>[];
 					totalAmount: bigint;
 				}
@@ -159,8 +162,8 @@ export async function handleLaunchpoolStake(
 			);
 			const existingStakes = await ctx.store.find(LaunchpoolStake, {
 				where: {
-					userAddress: In(userAddresses),
-					poolId: launchpool.id,
+					user: In(userAddresses),
+					id: launchpoolToSave.id,
 				},
 			});
 
@@ -170,7 +173,7 @@ export async function handleLaunchpoolStake(
 
 			console.trace("Creating a set of users with existing stakes...");
 			const usersWithExistingStakes = new Set(
-				existingStakes.map((stake) => stake.userAddress)
+				existingStakes.map((stake) => stake.user.id)
 			);
 
 			console.trace("Checking for new stakers...");
@@ -189,15 +192,15 @@ export async function handleLaunchpoolStake(
 				totalNewStaked += userData.totalAmount;
 			}
 
-			const oldTotalStaked = launchpool.totalStaked;
-			const oldTotalStakers = launchpool.totalStakers;
+			const oldTotalStaked = launchpoolToSave.totalStaked;
+			const oldTotalStakers = launchpoolToSave.totalStakers;
 
-			launchpool.totalStaked += totalNewStaked;
-			launchpool.totalStakers += newStakersCount;
-			launchpool.updatedAt = new Date();
+			launchpoolToSave.totalStaked += totalNewStaked;
+			launchpoolToSave.totalStakers += newStakersCount;
+			launchpoolToSave.updatedAt = new Date();
 
 			logger.info(
-				`Pool stats update: totalStaked ${oldTotalStaked} -> ${launchpool.totalStaked}, totalStakers ${oldTotalStakers} -> ${launchpool.totalStakers}`
+				`Pool stats update: totalStaked ${oldTotalStaked} -> ${launchpoolToSave.totalStaked}, totalStakers ${oldTotalStakers} -> ${launchpoolToSave.totalStakers}`
 			);
 
 			// Create or update users and build stake entities
@@ -253,27 +256,17 @@ export async function handleLaunchpoolStake(
 					const event = userData.events[i];
 
 					try {
-						// Simple placeholder values for rates - in production you'd compute these
-						const nativeExRate = 1000000n; // Simplified - would come from pool contract
-						const projectExRate = 1000000n; // Simplified - would come from pool contract
-
 						const stakeId = `${log.id}-${userAddress}`;
 						console.trace(`Creating stake: ID=${stakeId}`);
 
 						const stake = new LaunchpoolStake({
 							id: stakeId,
-							userAddress,
-							poolId: launchpool.id,
 							amount: event.amount,
-							nativeAmount:
-								(event.amount * nativeExRate) / 1000000n, // Simplified calculation
 							blockNumber: BigInt(log.block.height),
 							timestamp: new Date(log.block.timestamp),
 							txHash: log.getTransaction().hash,
-							nativeExchangeRate: nativeExRate,
-							cumulativeProjectExRate: projectExRate,
 							user,
-							launchpool,
+							launchpool: launchpoolToSave,
 							createdAt: new Date(log.block.timestamp),
 						});
 
@@ -281,13 +274,12 @@ export async function handleLaunchpoolStake(
 					} catch (stakeErr) {
 						logger.error(
 							stakeErr,
-							`ERROR: Failed to create stake for user ${userAddress}:`
+							`Failed to create stake for user ${userAddress}:`
 						);
 					}
 				}
 			}
 
-			// Fetch on-chain project tokens exchange rate
 			console.trace("Scheduling APY update after creating stakes");
 			scheduleOnce(
 				`update-staker-apy-${Date.now()}`,
@@ -303,7 +295,7 @@ export async function handleLaunchpoolStake(
 
 			// Save everything in batches
 			await ctx.store.save(usersToSave);
-			await ctx.store.save(launchpool);
+			await ctx.store.save(launchpoolToSave);
 			await ctx.store.save(stakesToSave);
 
 			console.trace(`Finished processing 1 pool: ${poolAddress}`);
@@ -315,41 +307,18 @@ export async function handleLaunchpoolStake(
 		);
 
 		return {
-			topic0: launchpoolAbi.events.Staked.topic,
+			topic0: launchpoolABI.events.Staked.topic,
 			success: true,
 			error: null,
 			unprocessedLogs: [],
 		};
-	} catch (finalErr) {
-		logger.error(finalErr, "Error processing stake events:");
+	} catch (err) {
+		logger.error(err, "Error processing stake events:");
 		return {
-			topic0: launchpoolAbi.events.Staked.topic,
+			topic0: launchpoolABI.events.Staked.topic,
 			success: false,
-			error: finalErr.message,
+			error: err.message,
 			unprocessedLogs: pendingLogs,
 		};
 	}
 }
-
-// async function calculateStakingAPY(
-// 	ctx: DataHandlerContext<Store>,
-// 	poolId: string
-// ): Promise<number> {
-// 	// Get the pool to understand current state
-// 	const pool = await ctx.store.findOneBy(Launchpool, { id: poolId });
-// 	if (!pool) return 0;
-
-// 	// Get current totalStaked value
-// 	const totalStaked = Number(pool.totalStaked);
-// 	if (totalStaked === 0) return 0;
-
-// 	// Get emission rate
-// 	// const latestEmissionRate = await ctx.store.findOne(LaunchpoolEmissionRate, {
-// 	// 	where: { poolId },
-// 	// 	order: { changeBlock: "DESC" },
-// 	// });
-
-// 	// if (!latestEmissionRate) return 0;
-
-// 	const latestEmissionRate;
-// }

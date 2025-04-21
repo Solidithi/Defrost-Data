@@ -1,7 +1,7 @@
-import { BlockData, Log, DataHandlerContext } from "@subsquid/evm-processor";
+import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { Launchpool, User } from "../model/generated";
-import { cacheStore, prismaClient } from "../singletons";
+import { Launchpool, Project } from "../model/generated";
+import { cacheStore, logger, prismaClient } from "../singletons";
 import { selectedChain } from "../config";
 import { normalizeAddress } from "../utils";
 import * as launchpoolLibraryAbi from "../typegen-abi/LaunchpoolLibrary";
@@ -16,14 +16,16 @@ export async function handleLaunchpoolCreated(
 	error: string | null;
 	unprocessedLogs: Log[];
 }> {
+	logger.info(`Processing ${pendingLogs.length} LaunchpoolCreated logs...`);
+
 	const secondsBetweenBlocks = (from: number, to: number): number => {
-		const signedBlockDelta = from - to;
+		const signedBlockDelta = to - from;
 		return signedBlockDelta * selectedChain.blockTime;
 	};
 
 	const ownerToLastActive = new Map<string, Date>();
 
-	const pools: Launchpool[] = pendingLogs.map((log) => {
+	const poolsToSave: Launchpool[] = pendingLogs.map((log) => {
 		const launchpoolCreated =
 			launchpoolLibraryAbi.events.LaunchpoolCreated.decode(log);
 
@@ -31,30 +33,32 @@ export async function handleLaunchpoolCreated(
 		ownerToLastActive.set(projectOwnerAddr, new Date(log.block.timestamp));
 
 		return new Launchpool({
-			id: launchpoolCreated.poolId.toString(),
-			chainId: selectedChain.blockTime,
+			id: normalizeAddress(launchpoolCreated.poolAddress),
+			poolId: launchpoolCreated.poolId.toString(),
+			chainId: selectedChain.chainId,
 			txHash: log.getTransaction().hash,
 			projectId: launchpoolCreated.projectId.toString(),
-			poolAddress: launchpoolCreated.poolAddress.toString(),
 
 			// Time tracking
 			startBlock: launchpoolCreated.startBlock,
 			endBlock: launchpoolCreated.endBlock,
+			// Estimate start/end dates based on current block timestamp and average block time
+			// Note: This is an estimation and might differ slightly from the actual block timestamps
 			startDate: new Date(
-				Date.now() +
+				log.block.timestamp + // log.block.timestamp is in miliseconds
 					secondsBetweenBlocks(
 						log.block.height,
 						Number(launchpoolCreated.startBlock)
 					) *
-						1000
+						1000 // Add estimated seconds * 1000 for milliseconds
 			),
 			endDate: new Date(
-				Date.now() +
+				log.block.timestamp +
 					secondsBetweenBlocks(
 						log.block.height,
 						Number(launchpoolCreated.endBlock)
 					) *
-						1000
+						1000 // Add estimated seconds * 1000 for milliseconds
 			),
 
 			// Asset tracking
@@ -74,6 +78,9 @@ export async function handleLaunchpoolCreated(
 			platformAPY: 0,
 			combinedAPY: 0,
 
+			// Relations
+			project: { id: launchpoolCreated.projectId.toString() } as Project,
+
 			// Time metadata
 			createdAt: new Date(log.block.timestamp),
 			updatedAt: new Date(log.block.timestamp),
@@ -81,17 +88,17 @@ export async function handleLaunchpoolCreated(
 	});
 
 	try {
-		await ctx.store.save(pools);
-		for (const pool of pools) {
-			await cacheStore.saveObservedLaunchpool(pool.poolAddress);
+		await ctx.store.save(poolsToSave);
+		for (const pool of poolsToSave) {
+			await cacheStore.saveObservedLaunchpool(pool.id);
 			// Debug logging
 			console.log(".............");
 			console.log(
-				`Added pool ${pool.poolAddress} to set of redis observed pools: `
+				`Added pool ${pool.id} to set of redis observed pools: `
 			);
 		}
 	} catch (e) {
-		console.error("Error saving pools: ", e);
+		logger.error(e, "Error saving pools: ");
 		return {
 			topic0: launchpoolLibraryAbi.events.LaunchpoolCreated.topic,
 			success: false,
@@ -116,8 +123,15 @@ export async function handleLaunchpoolCreated(
 				},
 			});
 		}
+
+		return {
+			topic0: launchpoolLibraryAbi.events.LaunchpoolCreated.topic,
+			success: true,
+			error: null,
+			unprocessedLogs: [],
+		};
 	} catch (err) {
-		console.error("Error updating users: ", err);
+		logger.error(err, "Error updating users: ");
 		return {
 			topic0: launchpoolLibraryAbi.events.LaunchpoolCreated.topic,
 			success: false,
@@ -125,11 +139,4 @@ export async function handleLaunchpoolCreated(
 			unprocessedLogs: pendingLogs,
 		};
 	}
-
-	return {
-		topic0: launchpoolLibraryAbi.events.LaunchpoolCreated.topic,
-		success: true,
-		error: null,
-		unprocessedLogs: [],
-	};
 }

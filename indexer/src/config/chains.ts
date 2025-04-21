@@ -19,7 +19,7 @@ export const availableChains: Record<ChainName, Chain> = {
 		rpc: "https://rpc.api.moonbase.moonbeam.network",
 		observedContracts: {
 			ProjectHubUpgradeableProxy: normalizeAddress(
-				"0x00FF4fF34536cab902fae709a384Ed7D3Ff8122A"
+				"0xB8618EaEEbFf1c817e3DD32A2e27Ece62C9d2317"
 			),
 		},
 		tokens: [
@@ -41,7 +41,7 @@ export const availableChains: Record<ChainName, Chain> = {
 				decimals: 18,
 			},
 		],
-		indexFromBlock: 11679219,
+		indexFromBlock: 11726378,
 	},
 	sepolia: {
 		chainId: 11155111,

@@ -1,18 +1,12 @@
 import "reflect-metadata";
 import { EvmBatchProcessor } from "@subsquid/evm-processor";
-import { Log } from "@subsquid/evm-processor";
 import { logger, prismaClient, typeormDB, cacheStore } from "./singletons";
 import { selectedChain } from "./config";
 import * as projectLibraryABI from "./typegen-abi/ProjectLibrary";
 import * as launchpoolLibraryABI from "./typegen-abi/LaunchpoolLibrary";
 import * as launchpoolABI from "./typegen-abi/Launchpool";
 import "dotenv/config";
-import {
-	LogsHandler,
-	handleLaunchpoolCreated,
-	handleProjectCreated,
-	handleLaunchpoolStake,
-} from "./handlers";
+import { logsDispatch } from "./handlers";
 import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
 import { updateLaunchpoolAPY } from "./tasks/actions";
 
@@ -31,6 +25,10 @@ if (!selectedChain.observedContracts.ProjectHubUpgradeableProxy) {
 	);
 }
 
+logger.info(
+	`Observing project hub proxy contract: ${selectedChain.observedContracts.ProjectHubUpgradeableProxy}`
+);
+
 const processor = new EvmBatchProcessor()
 	.setGateway(selectedChain.squidGateway)
 	.setRpcEndpoint({
@@ -42,37 +40,27 @@ const processor = new EvmBatchProcessor()
 	})
 	.setFinalityConfirmation(10) // 6 seconds confirmation time
 	.addLog({
-		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubProjeUpgradable Proxy contract
+		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubUpgradable Proxy contract
 		topic0: [projectLibraryABI.events.ProjectCreated.topic],
 		transaction: true,
 	})
 	.addLog({
-		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubProjeUpgradable Proxy contract
+		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubUpgradable Proxy contract
 		topic0: [launchpoolLibraryABI.events.LaunchpoolCreated.topic],
 		transaction: true,
 	})
 	.addLog({
 		topic0: [launchpoolABI.events.Staked.topic],
 		transaction: true,
+	})
+	.addLog({
+		topic0: [launchpoolABI.events.Unstaked.topic],
+		transaction: true,
+	})
+	.addLog({
+		topic0: [launchpoolABI.events.ProjectTokensClaimed.topic],
+		transaction: true,
 	});
-
-const logsDispatch = new Map<
-	string,
-	{ pendingLogs: Log[]; logsHandler: LogsHandler }
->();
-
-logsDispatch.set(projectLibraryABI.events.ProjectCreated.topic, {
-	pendingLogs: [],
-	logsHandler: handleProjectCreated,
-});
-logsDispatch.set(launchpoolLibraryABI.events.LaunchpoolCreated.topic, {
-	pendingLogs: [],
-	logsHandler: handleLaunchpoolCreated,
-});
-logsDispatch.set(launchpoolABI.events.Staked.topic, {
-	pendingLogs: [],
-	logsHandler: handleLaunchpoolStake,
-});
 
 let isIndexerInitialized = false;
 
@@ -177,13 +165,6 @@ onIndexerStartup().then(() =>
 
 // Test schedule once
 const poolAddress = "0xd2ae079e420c600d414444666182cf26f618de1e";
-
-// scheduleOnce(
-// 	"update-staker-apy",
-// 	createTask("update-staker-apy", 10, updateLaunchpoolAPY.name, 1),
-
-// 	new Date(Date.now() + 5000)
-// );
 
 scheduleOnce(
 	`update-staker-apy-${Date.now()}`,

@@ -1,7 +1,7 @@
 import { taskQueue } from "./queue";
 import { cacheStore, prismaClient } from "../singletons";
 import { logger } from "../singletons";
-import { actionRegistry } from "./action-registry";
+import { actionRegistry } from "./actions/action-registry";
 
 /**
  * Main worker function that processes tasks from the queue

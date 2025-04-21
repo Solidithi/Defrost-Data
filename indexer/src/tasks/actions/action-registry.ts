@@ -1,6 +1,6 @@
 /* Actions can't be serialized, so we need to map their names to the actual implementation */
-import { updateLaunchpoolAPY } from "./actions/update-launchpool-apy";
-import { ActionHandler } from "./type";
+import { updateLaunchpoolAPY } from "./update-launchpool-apy";
+import { ActionHandler } from "../type";
 
 // Type-safe action registry
 export const actionRegistry = new Map<string, ActionHandler>();

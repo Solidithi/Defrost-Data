@@ -2,7 +2,7 @@ import { Task } from "./type";
 import { taskQueue } from "./queue";
 import { cacheStore } from "../singletons";
 import { logger } from "../singletons";
-import { actionRegistry } from "./action-registry";
+import { actionRegistry } from "./actions/action-registry";
 
 // Store for recurring tasks
 const recurringTasks: Map<
