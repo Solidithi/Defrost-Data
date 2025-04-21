@@ -1,6 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, OneToMany as OneToMany_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
-import {Launchpool} from "./launchpool.model"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "@subsquid/typeorm-store"
 import {User} from "./user.model"
+import {Launchpool} from "./launchpool.model"
 
 @Entity_()
 export class Project {
@@ -13,9 +13,6 @@ export class Project {
 
     @StringColumn_({nullable: true})
     name!: string | undefined | null
-
-    @StringColumn_({nullable: false})
-    projectOwner!: string
 
     @StringColumn_({nullable: true})
     tokenAddress!: string | undefined | null
@@ -47,10 +44,10 @@ export class Project {
     @DateTimeColumn_({nullable: false})
     createdAt!: Date
 
-    @OneToMany_(() => Launchpool, e => e.project)
-    launchpools!: Launchpool[]
-
     @Index_()
     @ManyToOne_(() => User, {nullable: true})
-    ownerDetails!: User
+    owner!: User
+
+    @OneToMany_(() => Launchpool, e => e.project)
+    launchpools!: Launchpool[]
 }

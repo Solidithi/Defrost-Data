@@ -19,12 +19,12 @@ export class User {
     lastActive!: Date
 
     @OneToMany_(() => LaunchpoolStake, e => e.user)
-    stakes!: LaunchpoolStake[]
+    launchpoolStakes!: LaunchpoolStake[]
 
     @OneToMany_(() => LaunchpoolUnstake, e => e.user)
-    unstakes!: LaunchpoolUnstake[]
+    launchpoolUnstakes!: LaunchpoolUnstake[]
 
-    @OneToMany_(() => Project, e => e.ownerDetails)
+    @OneToMany_(() => Project, e => e.owner)
     ownedProjects!: Project[]
 
     @IntColumn_({nullable: false})

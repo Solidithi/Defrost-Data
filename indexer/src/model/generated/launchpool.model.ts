@@ -16,7 +16,7 @@ export class Launchpool {
     id!: string
 
     @StringColumn_({nullable: false})
-    poolAddress!: string
+    poolId!: string
 
     @StringColumn_({nullable: false})
     projectId!: string

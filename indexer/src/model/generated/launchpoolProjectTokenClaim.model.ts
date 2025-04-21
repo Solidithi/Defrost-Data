@@ -3,8 +3,8 @@ import {User} from "./user.model"
 import {Launchpool} from "./launchpool.model"
 
 @Entity_()
-export class LaunchpoolStake {
-    constructor(props?: Partial<LaunchpoolStake>) {
+export class LaunchpoolProjectTokenClaim {
+    constructor(props?: Partial<LaunchpoolProjectTokenClaim>) {
         Object.assign(this, props)
     }
 
@@ -12,7 +12,7 @@ export class LaunchpoolStake {
     id!: string
 
     @BigIntColumn_({nullable: false})
-    amount!: bigint
+    projectTokenAmount!: bigint
 
     @BigIntColumn_({nullable: false})
     blockNumber!: bigint

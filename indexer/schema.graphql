@@ -1,7 +1,7 @@
 type Project @entity {
 	id: ID! # This is on-chain project ID (yes, it's implicit af thanks to TypeORM constraint to have column called id)
 	name: String
-	projectOwner: String!
+	# projectOwner: String! # Redundant, already specified by the owner ID
 	tokenAddress: String
 	tokenSymbol: String
 	tokenDecimals: Int
@@ -14,14 +14,14 @@ type Project @entity {
 	createdAt: DateTime!
 
 	# Relations
+	owner: User!
 	launchpools: [Launchpool!]! @derivedFrom(field: "project")
-	ownerDetails: User!
 }
 
 type Launchpool @entity {
-	id: ID! # This is on-chain pool ID (yes, it's implicit af thanks to TypeORM constraint to have column called id)
-	poolAddress: String!
-	projectId: String!
+	id: ID! # This is on-chain pool address (yes, it's implicit af thanks to TypeORM constraint to have column called id)
+	poolId: String!
+	projectId: String! # Is this really needed? We can get it from the project relation
 	txHash: String!
 	chainId: Int!
 
@@ -73,15 +73,16 @@ type User @entity {
 	lastActive: DateTime!
 
 	# Relations
-	stakes: [LaunchpoolStake!] @derivedFrom(field: "user")
-	unstakes: [LaunchpoolUnstake!] @derivedFrom(field: "user")
-	ownedProjects: [Project!] @derivedFrom(field: "ownerDetails")
+	launchpoolStakes: [LaunchpoolStake!] @derivedFrom(field: "user")
+	launchpoolUnstakes: [LaunchpoolUnstake!] @derivedFrom(field: "user")
+	ownedProjects: [Project!] @derivedFrom(field: "owner")
 
 	# User stats
 	totalPoolsParticipated: Int!
 	totalStaked: BigInt! # Is this really needed? We have totalStaked in contract, plus it can be problematic since we have multiple types of pools, each with different currencies/tokens
 }
 
+# Is this table really needed?
 type LaunchpoolEmissionRate @entity {
 	id: ID!
 	poolId: String!
@@ -120,17 +121,17 @@ type LaunchpoolProjectExRateSnapshot @entity {
 
 type LaunchpoolStake @entity {
 	id: ID!
-	userAddress: String!
-	poolId: String!
+	# userAddress: String!
+	# poolId: String!
 	amount: BigInt!
-	nativeAmount: BigInt! # Already in contract
+	# nativeAmount: BigInt! # Already in contract
 	blockNumber: BigInt!
 	timestamp: DateTime!
 	txHash: String!
 
 	# Exchange rates
-	nativeExchangeRate: BigInt!
-	cumulativeProjectExRate: BigInt!
+	# nativeExchangeRate: BigInt! # Is this really needed?
+	# cumulativeProjectExRate: BigInt! # Is this really needed?
 
 	# Relations
 	user: User!
@@ -141,18 +142,18 @@ type LaunchpoolStake @entity {
 
 type LaunchpoolUnstake @entity {
 	id: ID!
-	userAddress: String!
-	poolId: String!
+	# userAddress: String! # Redundant, already specified by the user ID
+	# poolId: String!
 	amount: BigInt!
-	nativeAmount: BigInt!
-	claimedProjectTokens: BigInt!
+	# nativeAmount: BigInt! # Is this really needed?
+	# claimedProjectTokens: BigInt! # Is this really needed?
 	blockNumber: BigInt!
 	timestamp: DateTime!
 	txHash: String!
 
 	# Exchange rates
-	nativeExchangeRate: BigInt!
-	cumulativeProjectExRate: BigInt!
+	# nativeExchangeRate: BigInt! # Is this really needed?
+	# cumulativeProjectExRate: BigInt! # Is this really needed?
 
 	# Relations
 	user: User!
@@ -163,13 +164,33 @@ type LaunchpoolUnstake @entity {
 
 type LaunchpoolInterestClaim @entity {
 	id: ID!
-	poolId: String!
+	# poolId: String!
 	claimType: LaunchpoolClaimType!
 	claimerAddress: String!
 	amount: BigInt!
 	blockNumber: BigInt!
 	timestamp: DateTime!
 	txHash: String!
+
+	# Relations
+	launchpool: Launchpool!
+	user: User!
+
+	createdAt: DateTime!
+}
+
+type LaunchpoolProjectTokenClaim @entity {
+	id: ID!
+	# projectId: String!
+	# userAddress: String!
+	projectTokenAmount: BigInt!
+	blockNumber: BigInt!
+	timestamp: DateTime!
+	txHash: String!
+
+	# Relations
+	user: User!
+	launchpool: Launchpool!
 
 	createdAt: DateTime!
 }
@@ -184,13 +205,6 @@ type PlatformStatistics @entity {
 	totalStakedValue: BigInt!
 	totalTransactions: Int!
 }
-
-# enum PoolType {
-# 	LAUNCHPOOL
-# 	LAUNCHPAD
-# 	VESTING
-# 	FARMING
-# }
 
 enum LaunchpoolClaimType {
 	OWNER_INTEREST
