@@ -1,19 +1,19 @@
 import { normalizeAddress } from "../utils";
-import { Chain, ChainName } from "./type";
+import { Chain, ChainID } from "./type";
 
-export const availableChains: Record<ChainName, Chain> = {
-	ethereum: {
-		chainId: 1,
-		name: "ethereum",
+export const availableChains: Record<ChainID, Chain> = {
+	1: {
+		chainID: 1,
+		chainName: "ethereum",
 		squidGateway: "https://v2.archive.subsquid.io/network/ethereum-mainnet",
 		rpc: "https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY",
 		blockTime: 12,
 		tokens: [],
 		indexFromBlock: 1,
 	},
-	moonbase_alpha: {
-		chainId: 1287,
-		name: "moonbase_alpha",
+	1287: {
+		chainID: 1287,
+		chainName: "moonbase_alpha",
 		blockTime: 6,
 		squidGateway: "https://v2.archive.subsquid.io/network/moonbase-testnet",
 		rpc: "https://rpc.api.moonbase.moonbeam.network",
@@ -43,9 +43,9 @@ export const availableChains: Record<ChainName, Chain> = {
 		],
 		indexFromBlock: 11726378,
 	},
-	sepolia: {
-		chainId: 11155111,
-		name: "sepolia",
+	11155111: {
+		chainID: 11155111,
+		chainName: "sepolia",
 		blockTime: 12,
 		squidGateway: "",
 		rpc: "",
@@ -55,6 +55,6 @@ export const availableChains: Record<ChainName, Chain> = {
 };
 
 /** @dev Change this to choose the chain on which the indexer will run */
-const selectedChainName: ChainName = "moonbase_alpha";
+const selectedChainID: ChainID = 1287; // Moonbase Alpha
 
-export const selectedChain = availableChains[selectedChainName];
+export const selectedChain = availableChains[selectedChainID];
