@@ -25,7 +25,7 @@ export async function handleProjectCreated(
 		projects.push(
 			new Project({
 				id: projectId.toString(),
-				chainId: selectedChain.chainId,
+				chainId: selectedChain.chainID,
 				createdAt: new Date(log.block.timestamp),
 				owner: { id: normalizeAddress(ownerAddress) } as User,
 				txHash: log.getTransaction().hash,

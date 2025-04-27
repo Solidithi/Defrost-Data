@@ -1,9 +1,8 @@
 export type ChainID = 1 | 1287 | 11155111;
-export type ChainName = "moonbase_alpha" | "ethereum" | "sepolia";
 
 export type Chain = {
 	chainID: ChainID;
-	chainName: ChainName;
+	chainName: string;
 	squidGateway: string;
 	rpc: string;
 	blockTime: number;

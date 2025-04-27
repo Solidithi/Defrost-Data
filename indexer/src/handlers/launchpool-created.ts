@@ -35,7 +35,7 @@ export async function handleLaunchpoolCreated(
 		return new Launchpool({
 			id: normalizeAddress(launchpoolCreated.poolAddress),
 			poolId: launchpoolCreated.poolId.toString(),
-			chainId: selectedChain.chainId,
+			chainId: selectedChain.chainID,
 			txHash: log.getTransaction().hash,
 			projectId: launchpoolCreated.projectId.toString(),
 

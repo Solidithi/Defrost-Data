@@ -21,7 +21,7 @@ Promise.all([initTaskWorker(), initTaskScheduler()])
 if (!selectedChain.observedContracts.ProjectHubUpgradeableProxy) {
 	throw new Error(
 		"ProjectHubUpgradeableProxy contract address not found for chain " +
-			selectedChain.name
+			selectedChain.chainName
 	);
 }
 
@@ -164,16 +164,16 @@ onIndexerStartup().then(() =>
 );
 
 // Test schedule once
-const poolAddress = "0xd2ae079e420c600d414444666182cf26f618de1e";
+// const poolAddress = "0xd2ae079e420c600d414444666182cf26f618de1e";
 
-scheduleOnce(
-	`update-staker-apy-${Date.now()}`,
-	10,
-	updateLaunchpoolAPY,
-	[poolAddress],
-	1,
-	new Date(Date.now() + 5000)
-);
-logger.info(
-	`TESTTTTTT Scheduled APY update for pool ${poolAddress} in 5 seconds`
-);
+// scheduleOnce(
+// 	`update-staker-apy-${Date.now()}`,
+// 	10,
+// 	updateLaunchpoolAPY,
+// 	[poolAddress],
+// 	1,
+// 	new Date(Date.now() + 5000)
+// );
+// logger.info(
+// 	`TESTTTTTT Scheduled APY update for pool ${poolAddress} in 5 seconds`
+// );

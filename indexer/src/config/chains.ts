@@ -4,7 +4,7 @@ import { Chain, ChainID } from "./type";
 export const availableChains: Record<ChainID, Chain> = {
 	1: {
 		chainID: 1,
-		chainName: "ethereum",
+		chainName: "Ethereum",
 		squidGateway: "https://v2.archive.subsquid.io/network/ethereum-mainnet",
 		rpc: "https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY",
 		blockTime: 12,
@@ -13,7 +13,7 @@ export const availableChains: Record<ChainID, Chain> = {
 	},
 	1287: {
 		chainID: 1287,
-		chainName: "moonbase_alpha",
+		chainName: "Moonbase Alpha Testnet",
 		blockTime: 6,
 		squidGateway: "https://v2.archive.subsquid.io/network/moonbase-testnet",
 		rpc: "https://rpc.api.moonbase.moonbeam.network",
@@ -41,11 +41,11 @@ export const availableChains: Record<ChainID, Chain> = {
 				decimals: 18,
 			},
 		],
-		indexFromBlock: 11726378,
+		indexFromBlock: 11810481,
 	},
 	11155111: {
 		chainID: 11155111,
-		chainName: "sepolia",
+		chainName: "Sepolia Testnet",
 		blockTime: 12,
 		squidGateway: "",
 		rpc: "",
