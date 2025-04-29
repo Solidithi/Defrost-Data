@@ -27,7 +27,8 @@
     "prisma": "^6.6.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.3.22"
+    "typeorm": "^0.3.22",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",

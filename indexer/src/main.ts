@@ -9,6 +9,7 @@ import "dotenv/config";
 import { logsDispatch } from "./handlers";
 import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
 import { updateLaunchpoolAPY } from "./tasks/actions";
+import yargs from 'yargs';
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
@@ -21,7 +22,7 @@ Promise.all([initTaskWorker(), initTaskScheduler()])
 if (!selectedChain.observedContracts.ProjectHubUpgradeableProxy) {
 	throw new Error(
 		"ProjectHubUpgradeableProxy contract address not found for chain " +
-			selectedChain.chainName
+		selectedChain.chainName
 	);
 }
 
@@ -36,7 +37,11 @@ const processor = new EvmBatchProcessor()
 		rateLimit: 10,
 	})
 	.setBlockRange({
-		from: selectedChain.indexFromBlock,
+
+		from: ((): number => {
+			const args = yargs(process.argv.slice(2)).parse();
+			return args.indexFromBlock ?? selectedChain.indexFromBlock;
+		})(),
 	})
 	.setFinalityConfirmation(10) // 6 seconds confirmation time
 	.addLog({
