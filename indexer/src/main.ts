@@ -8,7 +8,6 @@ import * as launchpoolABI from "./typegen-abi/Launchpool";
 import "dotenv/config";
 import { logsDispatch } from "./handlers";
 import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
-import { updateLaunchpoolAPY } from "./tasks/actions";
 import yargs from "yargs";
 
 // Initialize both task worker and scheduler
