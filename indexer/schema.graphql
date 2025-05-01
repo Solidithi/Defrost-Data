@@ -195,15 +195,15 @@ type LaunchpoolProjectTokenClaim @entity {
 	createdAt: DateTime!
 }
 
-type PlatformStatistics @entity {
+type PlatformMetricsSnapshots @entity {
 	id: ID!
-	date: DateTime!
-	totalProjects: Int!
-	totalPools: Int!
-	uniqueUsers: Int!
-	dailyActiveUsers: Int!
-	totalStakedValue: BigInt!
-	totalTransactions: Int!
+	timestamp: DateTime!
+	countProjects: Int!
+	countLaunchpools: Int!
+	countUniqueUsers: Int!
+	countTransactions: Int!
+	countActiveUsers: Int! # Active users: users who had > 1 transaction on this platform since the timestamp of the previous metrics snapshot
+	totalValueLocked: BigInt! # total value locked, in USD
 }
 
 enum LaunchpoolClaimType {

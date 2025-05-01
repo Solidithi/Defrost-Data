@@ -1,8 +1,8 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, DateTimeColumn as DateTimeColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
 
 @Entity_()
-export class PlatformStatistics {
-    constructor(props?: Partial<PlatformStatistics>) {
+export class PlatformMetricsSnapshots {
+    constructor(props?: Partial<PlatformMetricsSnapshots>) {
         Object.assign(this, props)
     }
 
@@ -10,23 +10,23 @@ export class PlatformStatistics {
     id!: string
 
     @DateTimeColumn_({nullable: false})
-    date!: Date
+    timestamp!: Date
 
     @IntColumn_({nullable: false})
-    totalProjects!: number
+    countProjects!: number
 
     @IntColumn_({nullable: false})
-    totalPools!: number
+    countLaunchpools!: number
 
     @IntColumn_({nullable: false})
-    uniqueUsers!: number
+    countUniqueUsers!: number
 
     @IntColumn_({nullable: false})
-    dailyActiveUsers!: number
+    countTransactions!: number
+
+    @IntColumn_({nullable: false})
+    countActiveUsers!: number
 
     @BigIntColumn_({nullable: false})
-    totalStakedValue!: bigint
-
-    @IntColumn_({nullable: false})
-    totalTransactions!: number
+    totalValueLocked!: bigint
 }

@@ -9,7 +9,7 @@ import "dotenv/config";
 import { logsDispatch } from "./handlers";
 import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
 import { updateLaunchpoolAPY } from "./tasks/actions";
-import yargs from 'yargs';
+import yargs from "yargs";
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
@@ -22,7 +22,7 @@ Promise.all([initTaskWorker(), initTaskScheduler()])
 if (!selectedChain.observedContracts.ProjectHubUpgradeableProxy) {
 	throw new Error(
 		"ProjectHubUpgradeableProxy contract address not found for chain " +
-		selectedChain.chainName
+			selectedChain.chainName
 	);
 }
 
@@ -37,7 +37,6 @@ const processor = new EvmBatchProcessor()
 		rateLimit: 10,
 	})
 	.setBlockRange({
-
 		from: ((): number => {
 			const args = yargs(process.argv.slice(2)).parse();
 			return args.indexFromBlock ?? selectedChain.indexFromBlock;
@@ -91,33 +90,6 @@ async function onIndexerStartup(): Promise<void> {
 		}
 	} catch (err) {
 		logger.fatal(err, "Error initializing connections: ");
-		process.exit(1);
-	}
-
-	// Insert first row for PlatformStatistics table
-	try {
-		const count = await prismaClient.platform_statistics.count();
-
-		if (count === 0) {
-			await prismaClient.platform_statistics.create({
-				data: {
-					id: "1",
-					date: new Date(),
-					total_projects: 0,
-					total_pools: 0,
-					unique_users: 0,
-					daily_active_users: 0,
-					total_staked_value: 0,
-					total_transactions: 0,
-				},
-			});
-			logger.debug("Created initial platform statistics record");
-		}
-	} catch (err) {
-		logger.fatal(
-			err,
-			"Error creating initial platform statistics record: "
-		);
 		process.exit(1);
 	}
 
