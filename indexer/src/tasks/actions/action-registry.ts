@@ -1,6 +1,7 @@
 /* Actions can't be serialized, so we need to map their names to the actual implementation */
 import { updateLaunchpoolAPY } from "./update-launchpool-apy";
 import { ActionHandler } from "../type";
+import { snapshotPlatformMetrics } from "./snapshot-platform-metrics";
 
 // Type-safe action registry
 export const actionRegistry = new Map<string, ActionHandler>();
@@ -14,3 +15,4 @@ export function registerAction<TArgs extends unknown[]>(
 }
 
 registerAction(updateLaunchpoolAPY.name, updateLaunchpoolAPY);
+registerAction(snapshotPlatformMetrics.name, snapshotPlatformMetrics);

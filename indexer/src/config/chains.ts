@@ -29,16 +29,18 @@ export const availableChains: Record<ChainID, Chain> = {
 					"0xd02d73e05b002cb8eb7bef9df8ed68ed39752465"
 				),
 				symbol: "VI",
+				id: "voucher-dot",
 				name: "Voucher Imaginary",
-				decimals: 18,
+				decimals: 10,
 			},
 			{
 				address: normalizeAddress(
 					"0x7a4ebae8ca815b9f52f23a8ac9a2f707d4d4ff81"
 				),
 				symbol: "NAT",
+				id: "bifrost-voucher-astr~",
 				name: "Native Token",
-				decimals: 18,
+				decimals: 10,
 			},
 		],
 		indexFromBlock: 11810481,

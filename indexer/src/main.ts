@@ -9,6 +9,7 @@ import "dotenv/config";
 import { logsDispatch } from "./handlers";
 import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
 import yargs from "yargs";
+import { snapshotPlatformMetrics } from "./tasks/actions/snapshot-platform-metrics";
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
@@ -71,6 +72,20 @@ async function onIndexerStartup(): Promise<void> {
 	if (isIndexerInitialized) {
 		return;
 	}
+
+	scheduleOnce(
+		`update-staker-apy-${Date.now()}`,
+		10,
+		snapshotPlatformMetrics,
+		[],
+		1,
+		new Date(Date.now())
+	);
+	logger.info(
+		// `TESTTTTTT Scheduled APY update for pool ${} in 5 seconds`
+		''
+	);
+	
 
 	try {
 		if (!cacheStore.isReady) {
@@ -142,14 +157,3 @@ onIndexerStartup().then(() =>
 // Test schedule once
 // const poolAddress = "0xd2ae079e420c600d414444666182cf26f618de1e";
 
-// scheduleOnce(
-// 	`update-staker-apy-${Date.now()}`,
-// 	10,
-// 	updateLaunchpoolAPY,
-// 	[poolAddress],
-// 	1,
-// 	new Date(Date.now() + 5000)
-// );
-// logger.info(
-// 	`TESTTTTTT Scheduled APY update for pool ${poolAddress} in 5 seconds`
-// );
