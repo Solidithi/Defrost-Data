@@ -13,6 +13,7 @@ export type Chain = {
 	tokens: {
 		address: string;
 		symbol: string;
+		id: string;
 		name: string;
 		decimals: number;
 		alias?: string; // Optional alias (for development purpose), e.g. "mockProjectToken"
