@@ -50,4 +50,19 @@ export class Project {
 
     @OneToMany_(() => Launchpool, e => e.project)
     launchpools!: Launchpool[]
+
+    @StringColumn_({nullable: true})
+    discord!: string | undefined | null
+
+    @StringColumn_({nullable: true})
+    github!: string | undefined | null
+
+    @StringColumn_({nullable: true})
+    telegram!: string | undefined | null
+
+    @StringColumn_({nullable: true})
+    twitter!: string | undefined | null
+
+    @StringColumn_({nullable: true})
+    website!: string | undefined | null
 }

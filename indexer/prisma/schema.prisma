@@ -136,17 +136,6 @@ model migrations {
   name      String @db.VarChar
 }
 
-model platform_statistics {
-  id                 String   @id(map: "PK_4416a2d6a3a4ec1260e13337020") @db.VarChar
-  date               DateTime @db.Timestamptz(6)
-  total_projects     Int
-  total_pools        Int
-  unique_users       Int
-  daily_active_users Int
-  total_staked_value Decimal  @db.Decimal
-  total_transactions Int
-}
-
 model project {
   id                String       @id(map: "PK_4d68b1358bb5b766d3e78f32f57") @db.VarChar
   name              String?
@@ -159,6 +148,11 @@ model project {
   long_description  String?
   tx_hash           String
   chain_id          Int
+  discord           String?
+  github            String?
+  telegram          String?
+  twitter           String?
+  website           String?
   created_at        DateTime     @db.Timestamptz(6)
   owner_id          String?      @db.VarChar
   launchpool        launchpool[]
@@ -196,8 +190,8 @@ model launchpool_project_token_claim {
   @@index([launchpool_id], map: "IDX_d77f4e25026b4b29be09ae93cd")
 }
 
-model metrics_snapshots {
-  id                 String   @id(map: "PK_4677ccfa4df2d677b6eac0190a3") @db.VarChar
+model platform_metrics_snapshots {
+  id                 String   @id(map: "PK_2edb023cca470d9ec7f196004d5") @db.VarChar
   timestamp          DateTime @db.Timestamptz(6)
   count_projects     Int
   count_launchpools  Int

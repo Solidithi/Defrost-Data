@@ -16,6 +16,13 @@ type Project @entity {
 	# Relations
 	owner: User!
 	launchpools: [Launchpool!]! @derivedFrom(field: "project")
+
+	# Social links (nullable)
+	discord: String
+	github: String
+	telegram: String
+	twitter: String
+	website: String
 }
 
 type Launchpool @entity {

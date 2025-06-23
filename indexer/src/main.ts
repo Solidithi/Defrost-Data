@@ -2,13 +2,13 @@ import "reflect-metadata";
 import { EvmBatchProcessor } from "@subsquid/evm-processor";
 import { logger, prismaClient, typeormDB, cacheStore } from "./singletons";
 import { selectedChain } from "./config";
+import { logsDispatch } from "./handlers";
+import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
+import "dotenv/config";
+import yargs from "yargs";
 import * as projectLibraryABI from "./typegen-abi/ProjectLibrary";
 import * as launchpoolLibraryABI from "./typegen-abi/LaunchpoolLibrary";
 import * as launchpoolABI from "./typegen-abi/Launchpool";
-import "dotenv/config";
-import { logsDispatch } from "./handlers";
-import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
-import yargs from "yargs";
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
