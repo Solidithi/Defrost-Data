@@ -39,7 +39,7 @@ const processor = new EvmBatchProcessor()
 	.setBlockRange({
 		from: ((): number => {
 			const args = yargs(process.argv.slice(2)).parse();
-			return args.indexFromBlock ?? selectedChain.indexFromBlock;
+			return args["indexFromBlock"] ?? selectedChain.indexFromBlock;
 		})(),
 	})
 	.setFinalityConfirmation(10) // 6 seconds confirmation time
