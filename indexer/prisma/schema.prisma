@@ -148,12 +148,12 @@ model project {
   long_description  String?
   tx_hash           String
   chain_id          Int
+  created_at        DateTime     @db.Timestamptz(6)
   discord           String?
   github            String?
   telegram          String?
   twitter           String?
   website           String?
-  created_at        DateTime     @db.Timestamptz(6)
   owner_id          String?      @db.VarChar
   launchpool        launchpool[]
   user              user?        @relation(fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d40afe32d1d771bea7a5f468185")
@@ -199,4 +199,5 @@ model platform_metrics_snapshots {
   count_transactions Int
   count_active_users Int
   total_value_locked Decimal  @db.Decimal
+  tokens_distributed Decimal  @default(0) @db.Decimal
 }

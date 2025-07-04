@@ -211,6 +211,7 @@ type PlatformMetricsSnapshots @entity {
 	countTransactions: Int!
 	countActiveUsers: Int! # Active users: users who had > 1 transaction on this platform since the timestamp of the previous metrics snapshot
 	totalValueLocked: BigInt! # total value locked, in USD
+	tokensDistributed: BigInt! # Total project tokens distributed (just bare amount, no decimals)
 }
 
 enum LaunchpoolClaimType {

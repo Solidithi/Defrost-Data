@@ -29,4 +29,7 @@ export class PlatformMetricsSnapshots {
 
     @BigIntColumn_({nullable: false})
     totalValueLocked!: bigint
+
+    @BigIntColumn_({nullable: false})
+    tokensDistributed!: bigint
 }
