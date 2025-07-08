@@ -3,8 +3,10 @@ import { event, fun, viewFun, indexed, ContractBase } from '@subsquid/evm-abi'
 import type { EventParams as EParams, FunctionArguments, FunctionReturn } from '@subsquid/evm-abi'
 
 export const events = {
+    OwnerInterestsClaimed: event("0x69d56ddf7e4c2fa07f9b0b8aec3d4381b34e868bd0284b3c03de42fe077bd860", "OwnerInterestsClaimed(address,uint256,uint256)", {"claimer": indexed(p.address), "ownerClaims": p.uint256, "platformFee": p.uint256}),
     OwnershipTransferred: event("0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0", "OwnershipTransferred(address,address)", {"previousOwner": indexed(p.address), "newOwner": indexed(p.address)}),
     Paused: event("0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258", "Paused(address)", {"account": p.address}),
+    PlatformFeeClaimed: event("0xb36c85b0201ed4518f6a4449c5e90313fb57d188669ce2b7e4194469811f4dcf", "PlatformFeeClaimed(address,uint256)", {"claimer": indexed(p.address), "platformFee": p.uint256}),
     ProjectTokensClaimed: event("0xda8a33b1852650a10f5393ae95d54ebfcb4e7e0fc67db151fd88babe81c7d887", "ProjectTokensClaimed(address,uint256)", {"user": indexed(p.address), "amount": p.uint256}),
     Staked: event("0x9e71bc8eea02a63969f509818f2dafb9254532904319f9dbda79b67bd34a5f3d", "Staked(address,uint256)", {"user": indexed(p.address), "amount": p.uint256}),
     Unpaused: event("0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa", "Unpaused(address)", {"account": p.address}),
@@ -39,7 +41,7 @@ export const functions = {
     lastNativeExRateUpdateBlock: viewFun("0xb1f0af1b", "lastNativeExRateUpdateBlock()", {}, p.uint128),
     lastProcessedChangeBlockIndex: viewFun("0xa748afb0", "lastProcessedChangeBlockIndex()", {}, p.uint256),
     maxStakers: viewFun("0x4f7ff503", "maxStakers()", {}, p.uint256),
-    maxVAssetPerStaker: viewFun("0x81cadea0", "maxVAssetPerStaker()", {}, p.uint256),
+    maxTokenPerStaker: viewFun("0xe154651a", "maxTokenPerStaker()", {}, p.uint256),
     nativeExRateSampleCount: viewFun("0x06508ebc", "nativeExRateSampleCount()", {}, p.uint128),
     owner: viewFun("0x8da5cb5b", "owner()", {}, p.address),
     ownerShareOfInterest: viewFun("0x84d38d48", "ownerShareOfInterest()", {}, p.uint128),
@@ -157,8 +159,8 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.maxStakers, {})
     }
 
-    maxVAssetPerStaker() {
-        return this.eth_call(functions.maxVAssetPerStaker, {})
+    maxTokenPerStaker() {
+        return this.eth_call(functions.maxTokenPerStaker, {})
     }
 
     nativeExRateSampleCount() {
@@ -211,8 +213,10 @@ export class Contract extends ContractBase {
 }
 
 /// Event types
+export type OwnerInterestsClaimedEventArgs = EParams<typeof events.OwnerInterestsClaimed>
 export type OwnershipTransferredEventArgs = EParams<typeof events.OwnershipTransferred>
 export type PausedEventArgs = EParams<typeof events.Paused>
+export type PlatformFeeClaimedEventArgs = EParams<typeof events.PlatformFeeClaimed>
 export type ProjectTokensClaimedEventArgs = EParams<typeof events.ProjectTokensClaimed>
 export type StakedEventArgs = EParams<typeof events.Staked>
 export type UnpausedEventArgs = EParams<typeof events.Unpaused>
@@ -300,8 +304,8 @@ export type LastProcessedChangeBlockIndexReturn = FunctionReturn<typeof function
 export type MaxStakersParams = FunctionArguments<typeof functions.maxStakers>
 export type MaxStakersReturn = FunctionReturn<typeof functions.maxStakers>
 
-export type MaxVAssetPerStakerParams = FunctionArguments<typeof functions.maxVAssetPerStaker>
-export type MaxVAssetPerStakerReturn = FunctionReturn<typeof functions.maxVAssetPerStaker>
+export type MaxTokenPerStakerParams = FunctionArguments<typeof functions.maxTokenPerStaker>
+export type MaxTokenPerStakerReturn = FunctionReturn<typeof functions.maxTokenPerStaker>
 
 export type NativeExRateSampleCountParams = FunctionArguments<typeof functions.nativeExRateSampleCount>
 export type NativeExRateSampleCountReturn = FunctionReturn<typeof functions.nativeExRateSampleCount>
