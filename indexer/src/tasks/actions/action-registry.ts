@@ -14,5 +14,6 @@ export function registerAction<TArgs extends unknown[]>(
 	actionRegistry.set(name, handler as ActionHandler);
 }
 
+// REGISTER ACTIONS HERE
 registerAction(updateLaunchpoolAPY.name, updateLaunchpoolAPY);
 registerAction(snapshotPlatformMetrics.name, snapshotPlatformMetrics);

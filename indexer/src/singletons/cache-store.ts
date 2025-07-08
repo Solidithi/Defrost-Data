@@ -62,6 +62,28 @@ export class CacheStore {
 		);
 	}
 
+	async getTokenInfo(
+		tokenAddress: string,
+		field: "name" | "symbol" | "decimals"
+	): Promise<number | null> {
+		const key = `token${normalizeAddress(tokenAddress)}`;
+		const decimalsStr = await this.redisClient.hGet(key, field);
+		return decimalsStr ? Number(decimalsStr) : null;
+	}
+
+	async saveTokenInfoField(
+		tokenAddress: string,
+		field: "name" | "symbol" | "decimals",
+		value: string,
+		TTL?: number
+	): Promise<void> {
+		const key = `token${normalizeAddress(tokenAddress)}`;
+		await this.redisClient.hSet(key, field, value);
+		if (TTL) {
+			await this.redisClient.expire(key, TTL);
+		}
+	}
+
 	async getScheduledTasks(
 		taskType: "once" | "recurring"
 	): Promise<Record<string, string>> {

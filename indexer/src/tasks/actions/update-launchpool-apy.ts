@@ -77,6 +77,7 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 	}
 	console.log("Native token decimals:", nativeTokenDecimals);
 
+	// Fetch native emission rate
 	console.log("Fetching lastEmissionRate and totalNativeStaked...");
 	const latestEmissionRate: bigint =
 		await launchpoolContract.getEmissionRate();
@@ -106,7 +107,7 @@ export async function updateLaunchpoolAPY(poolAddress: string): Promise<void> {
 	console.log(`Updated ${affected ? 1 : 0} rows in launchpool for new APY`);
 }
 
-function calcProjectTokenAPY(
+export function calcProjectTokenAPY(
 	emissionRate: bigint,
 	totalStaked: bigint,
 	pTokenDecimals: number,
@@ -119,16 +120,16 @@ function calcProjectTokenAPY(
 		throw new Error("Native token decimals not provided");
 	}
 
-	const blocksPerYear = (365 * 24 * 60 * 60) / selectedChain.blockTime;
+	const blocksPerYear = (365 * 24 * 60 * 60) / selectedChain.blockTime; // seconds
 
 	// Calculate yearly emission
 	const yearlyEmission = emissionRate * BigInt(blocksPerYear);
 	const yearlyEmissionNum = Number(
 		ethers.formatUnits(yearlyEmission, pTokenDecimals)
-	); // Assuming 18 decimals for the token (change later)
+	);
 	const totalStakedNum = Number(
 		ethers.formatUnits(totalStaked, nativeTokenDecimals)
-	); // Assuming 18 decimals for the token (change later)
+	);
 
 	const apy = (yearlyEmissionNum / totalStakedNum) * 100;
 	return apy;

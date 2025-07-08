@@ -20,9 +20,23 @@ export async function snapshotPlatformMetrics(): Promise<void> {
 		const totalUniqueUsers = await prismaClient.user.count();
 		console.log("Total Unique Users: ", totalUniqueUsers);
 
+		// Aggregate total amount of tokens distributed launchpools
+		const resultTokensDistributed = await prismaClient.$queryRaw`
+			SELECT (
+				(SELECT tokens_distributed 
+				FROM platform_metrics_snapshots 
+				ORDER BY timestamp DESC 
+				LIMIT 1) 
+				+ COALESCE((
+					SELECT SUM(project_token_amount / POW(10, project_token_decimals))
+					FROM launchpool_project_token_claim
+					WHERE timestamp > (SELECT MAX(timestamp) FROM platform_metrics_snapshots)
+				), 0)
+			) AS tokens_distributed;
+		`;
+
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
 		const totalActiveUsers = await prismaClient.user.count({
 			where: {
 				last_active: {
@@ -147,6 +161,8 @@ export async function snapshotPlatformMetrics(): Promise<void> {
 					count_projects: totalProjects,
 					count_transactions: totalTx,
 					total_value_locked: totalStakedAmount,
+					tokens_distributed:
+						resultTokensDistributed[0]?.tokens_distributed || 0,
 					id: `${timestamp}`,
 				},
 			}
@@ -158,5 +174,4 @@ export async function snapshotPlatformMetrics(): Promise<void> {
 		logger.error(`Error fetching platform metrics: ${error}`);
 		return;
 	}
-	// Write data to PlatformMetricsSnapshots table using prismaClient or typeOrmDB
 }

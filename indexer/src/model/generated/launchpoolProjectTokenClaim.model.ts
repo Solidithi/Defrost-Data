@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
 import {User} from "./user.model"
 import {Launchpool} from "./launchpool.model"
 
@@ -13,6 +13,9 @@ export class LaunchpoolProjectTokenClaim {
 
     @BigIntColumn_({nullable: false})
     projectTokenAmount!: bigint
+
+    @IntColumn_({nullable: false})
+    projectTokenDecimals!: number
 
     @BigIntColumn_({nullable: false})
     blockNumber!: bigint
