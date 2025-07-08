@@ -191,6 +191,7 @@ type LaunchpoolProjectTokenClaim @entity {
 	# projectId: String!
 	# userAddress: String!
 	projectTokenAmount: BigInt!
+	projectTokenDecimals: Int! # Denormalized column, combined with caching for fast aggregation
 	blockNumber: BigInt!
 	timestamp: DateTime!
 	txHash: String!

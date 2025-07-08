@@ -7,9 +7,15 @@ import * as launchpoolLibraryABI from "./typegen-abi/LaunchpoolLibrary";
 import * as launchpoolABI from "./typegen-abi/Launchpool";
 import "dotenv/config";
 import { logsDispatch } from "./handlers";
-import { initTaskWorker, initTaskScheduler, scheduleOnce } from "./tasks";
+import {
+	initTaskWorker,
+	initTaskScheduler,
+	scheduleOnce,
+	scheduleRecurring,
+} from "./tasks";
 import yargs from "yargs";
 import { snapshotPlatformMetrics } from "./tasks/actions/snapshot-platform-metrics";
+import { updateLaunchpoolAPY } from "./tasks/actions";
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
@@ -68,6 +74,10 @@ const processor = new EvmBatchProcessor()
 
 let isIndexerInitialized = false;
 
+/**
+ * @dev If you wanna schedule tasks, do it here
+ * @returns
+ */
 async function onIndexerStartup(): Promise<void> {
 	if (isIndexerInitialized) {
 		return;
@@ -76,15 +86,21 @@ async function onIndexerStartup(): Promise<void> {
 	scheduleOnce(
 		`update-staker-apy-${Date.now()}`,
 		10,
-		snapshotPlatformMetrics,
-		[],
+		updateLaunchpoolAPY,
+		["0xfbe66a07021d7cf5bd89486abe9690421dcc649b"],
 		1,
 		new Date(Date.now())
 	);
-	logger.info(
-		// `TESTTTTTT Scheduled APY update for pool ${} in 5 seconds`
-		""
+	scheduleRecurring(
+		`snapshot-platform-metrics${Date.now()}`,
+		1,
+		snapshotPlatformMetrics,
+		[],
+		1,
+		1000 * 60 // every 1 minute
 	);
+
+	logger.info("");
 
 	try {
 		if (!cacheStore.isReady) {

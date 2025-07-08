@@ -175,16 +175,17 @@ model user {
 }
 
 model launchpool_project_token_claim {
-  id                   String      @id(map: "PK_61bf92c0d4b30ff33956785480b") @db.VarChar
-  project_token_amount Decimal     @db.Decimal
-  block_number         Decimal     @db.Decimal
-  timestamp            DateTime    @db.Timestamptz(6)
-  tx_hash              String
-  created_at           DateTime    @db.Timestamptz(6)
-  user_id              String?     @db.VarChar
-  launchpool_id        String?     @db.VarChar
-  user                 user?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_772b6b6ec508506b8d681c6f2a8")
-  launchpool           launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d77f4e25026b4b29be09ae93cdd")
+  id                     String      @id(map: "PK_61bf92c0d4b30ff33956785480b") @db.VarChar
+  project_token_amount   Decimal     @db.Decimal
+  block_number           Decimal     @db.Decimal
+  timestamp              DateTime    @db.Timestamptz(6)
+  tx_hash                String
+  created_at             DateTime    @db.Timestamptz(6)
+  user_id                String?     @db.VarChar
+  launchpool_id          String?     @db.VarChar
+  project_token_decimals Int
+  user                   user?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_772b6b6ec508506b8d681c6f2a8")
+  launchpool             launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d77f4e25026b4b29be09ae93cdd")
 
   @@index([user_id], map: "IDX_772b6b6ec508506b8d681c6f2a")
   @@index([launchpool_id], map: "IDX_d77f4e25026b4b29be09ae93cd")
@@ -199,5 +200,5 @@ model platform_metrics_snapshots {
   count_transactions Int
   count_active_users Int
   total_value_locked Decimal  @db.Decimal
-  tokens_distributed Decimal  @default(0) @db.Decimal
+  tokens_distributed Decimal  @db.Decimal
 }
