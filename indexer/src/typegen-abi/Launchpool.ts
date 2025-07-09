@@ -31,6 +31,7 @@ export const functions = {
     endBlock: viewFun("0x083c6323", "endBlock()", {}, p.uint128),
     getClaimableProjectToken: viewFun("0x80729f17", "getClaimableProjectToken(address)", {"_investor": p.address}, p.uint256),
     getEmissionRate: viewFun("0xc0a77da9", "getEmissionRate()", {}, p.uint256),
+    getPlatformAndOwnerClaimableVAssets: viewFun("0xf76e14f5", "getPlatformAndOwnerClaimableVAssets()", {}, {"ownerClaims": p.uint256, "platformFee": p.uint256}),
     getPoolInfo: viewFun("0x60246c88", "getPoolInfo()", {}, {"_0": p.uint128, "_1": p.uint128, "_2": p.uint256, "_3": p.uint256}),
     getStakerNativeAmount: viewFun("0x7d334107", "getStakerNativeAmount(address)", {"_investor": p.address}, p.uint256),
     getStakingRange: viewFun("0xfce88e6f", "getStakingRange()", {}, {"_0": p.uint256, "_1": p.uint256}),
@@ -117,6 +118,10 @@ export class Contract extends ContractBase {
 
     getEmissionRate() {
         return this.eth_call(functions.getEmissionRate, {})
+    }
+
+    getPlatformAndOwnerClaimableVAssets() {
+        return this.eth_call(functions.getPlatformAndOwnerClaimableVAssets, {})
     }
 
     getPoolInfo() {
@@ -273,6 +278,9 @@ export type GetClaimableProjectTokenReturn = FunctionReturn<typeof functions.get
 
 export type GetEmissionRateParams = FunctionArguments<typeof functions.getEmissionRate>
 export type GetEmissionRateReturn = FunctionReturn<typeof functions.getEmissionRate>
+
+export type GetPlatformAndOwnerClaimableVAssetsParams = FunctionArguments<typeof functions.getPlatformAndOwnerClaimableVAssets>
+export type GetPlatformAndOwnerClaimableVAssetsReturn = FunctionReturn<typeof functions.getPlatformAndOwnerClaimableVAssets>
 
 export type GetPoolInfoParams = FunctionArguments<typeof functions.getPoolInfo>
 export type GetPoolInfoReturn = FunctionReturn<typeof functions.getPoolInfo>
