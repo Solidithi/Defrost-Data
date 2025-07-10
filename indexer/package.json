@@ -7,7 +7,7 @@
 		"start": "node lib/main.js",
 		"bstart": "pnpm run build && node lib/main.js",
 		"abi:gen": "squid-evm-typegen src/typegen-abi ./abi/*",
-		"typeorm:gen": "pnpm run build && squid-typeorm-codegen && squid-typeorm-migration generate",
+		"typeorm:gen": "pnpm build && squid-typeorm-codegen && squid-typeorm-migration generate",
 		"typeorm:migrate": "squid-typeorm-migration apply && prisma db pull && prisma generate",
 		"lint": "eslint src --ext .ts,.js",
 		"format": "prettier --write \"src/**/*.{ts,js,json}\""
