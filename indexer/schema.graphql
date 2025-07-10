@@ -203,6 +203,31 @@ type LaunchpoolProjectTokenClaim @entity {
 	createdAt: DateTime!
 }
 
+type LaunchpoolOwnerInterestsClaimed @entity {
+	id: ID!
+	ownerClaims: BigInt!
+	platformFee: BigInt!
+
+	timestamp: DateTime!
+	createdAt: DateTime!
+
+	# Relations
+	claimer: User!
+	launchpool: Launchpool!
+}
+
+type LaunchpoolPlatformFeeClaimed @entity {
+	id: ID!
+	platformFee: BigInt!
+
+	timestamp: DateTime!
+	createdAt: DateTime!
+
+	# Relations
+	launchpool: Launchpool!
+	claimer: User!
+}
+
 type PlatformMetricsSnapshots @entity {
 	id: ID!
 	timestamp: DateTime!

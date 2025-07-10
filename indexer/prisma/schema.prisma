@@ -33,6 +33,8 @@ model launchpool {
   launchpool_emission_rate            launchpool_emission_rate[]
   launchpool_interest_claim           launchpool_interest_claim[]
   launchpool_native_ex_rate_snapshot  launchpool_native_ex_rate_snapshot[]
+  launchpool_owner_interests_claimed  launchpool_owner_interests_claimed[]
+  launchpool_platform_fee_claimed     launchpool_platform_fee_claimed[]
   launchpool_project_ex_rate_snapshot launchpool_project_ex_rate_snapshot[]
   launchpool_project_token_claim      launchpool_project_token_claim[]
   launchpool_stake                    launchpool_stake[]
@@ -162,16 +164,18 @@ model project {
 }
 
 model user {
-  id                             String                           @id(map: "PK_cace4a159ff9f2512dd42373760") @db.VarChar
-  first_seen                     DateTime                         @db.Timestamptz(6)
-  last_active                    DateTime                         @db.Timestamptz(6)
-  total_pools_participated       Int
-  total_staked                   Decimal                          @db.Decimal
-  launchpool_interest_claim      launchpool_interest_claim[]
-  launchpool_project_token_claim launchpool_project_token_claim[]
-  launchpool_stake               launchpool_stake[]
-  launchpool_unstake             launchpool_unstake[]
-  project                        project[]
+  id                                 String                               @id(map: "PK_cace4a159ff9f2512dd42373760") @db.VarChar
+  first_seen                         DateTime                             @db.Timestamptz(6)
+  last_active                        DateTime                             @db.Timestamptz(6)
+  total_pools_participated           Int
+  total_staked                       Decimal                              @db.Decimal
+  launchpool_interest_claim          launchpool_interest_claim[]
+  launchpool_owner_interests_claimed launchpool_owner_interests_claimed[]
+  launchpool_platform_fee_claimed    launchpool_platform_fee_claimed[]
+  launchpool_project_token_claim     launchpool_project_token_claim[]
+  launchpool_stake                   launchpool_stake[]
+  launchpool_unstake                 launchpool_unstake[]
+  project                            project[]
 }
 
 model launchpool_project_token_claim {
@@ -201,4 +205,33 @@ model platform_metrics_snapshots {
   count_active_users Int
   total_value_locked Decimal  @db.Decimal
   tokens_distributed Decimal  @db.Decimal
+}
+
+model launchpool_owner_interests_claimed {
+  id            String      @id(map: "PK_68e9e13a9b166e4a353779422a2") @db.VarChar
+  owner_claims  Decimal     @db.Decimal
+  platform_fee  Decimal     @db.Decimal
+  timestamp     DateTime    @db.Timestamptz(6)
+  created_at    DateTime    @db.Timestamptz(6)
+  claimer_id    String?     @db.VarChar
+  launchpool_id String?     @db.VarChar
+  launchpool    launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1df32af5b9000c67e507d6a9a17")
+  user          user?       @relation(fields: [claimer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d7d3bf9aafab477db9703d2de45")
+
+  @@index([launchpool_id], map: "IDX_1df32af5b9000c67e507d6a9a1")
+  @@index([claimer_id], map: "IDX_d7d3bf9aafab477db9703d2de4")
+}
+
+model launchpool_platform_fee_claimed {
+  id            String      @id(map: "PK_ed49e0fe01f8be861a5b2b8ea02") @db.VarChar
+  platform_fee  Decimal     @db.Decimal
+  timestamp     DateTime    @db.Timestamptz(6)
+  created_at    DateTime    @db.Timestamptz(6)
+  launchpool_id String?     @db.VarChar
+  claimer_id    String?     @db.VarChar
+  launchpool    launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_358fd5548620c722600708f4144")
+  user          user?       @relation(fields: [claimer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f93b87600b37d9055cdc37aae70")
+
+  @@index([launchpool_id], map: "IDX_358fd5548620c722600708f414")
+  @@index([claimer_id], map: "IDX_f93b87600b37d9055cdc37aae7")
 }
