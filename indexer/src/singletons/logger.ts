@@ -45,6 +45,3 @@ const fileTransport = pino.transport({
 });
 
 export const logger = pino(fileTransport);
-
-// Test logger
-logger.info("Logger initialized successfully");
