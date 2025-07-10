@@ -1,11 +1,11 @@
 import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { User, Project } from "../model/generated";
-import { selectedChain } from "../config";
-import * as projectLibraryAbi from "../typegen-abi/ProjectLibrary";
-import { normalizeAddress } from "../utils";
+import { User, Project } from "../../model/generated";
+import { selectedChain } from "../../config";
+import { normalizeAddress } from "../../utils";
+import { logger } from "../../singletons";
 import { In } from "typeorm";
-import { logger } from "../singletons";
+import * as projectLibraryAbi from "../../typegen-abi/ProjectLibrary";
 
 export async function handleProjectCreated(
 	ctx: DataHandlerContext<Store>,

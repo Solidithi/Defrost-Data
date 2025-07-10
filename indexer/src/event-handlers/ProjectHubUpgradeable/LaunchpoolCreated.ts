@@ -1,10 +1,10 @@
 import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { Launchpool, Project } from "../model/generated";
-import { cacheStore, logger, prismaClient } from "../singletons";
-import { selectedChain } from "../config";
-import { normalizeAddress } from "../utils";
-import * as launchpoolLibraryAbi from "../typegen-abi/LaunchpoolLibrary";
+import { Launchpool, Project } from "../../model/generated";
+import { cacheStore, logger, prismaClient } from "../../singletons";
+import { selectedChain } from "../../config";
+import { normalizeAddress } from "../../utils";
+import * as launchpoolLibraryAbi from "../../typegen-abi/LaunchpoolLibrary";
 
 export async function handleLaunchpoolCreated(
 	ctx: DataHandlerContext<Store>,

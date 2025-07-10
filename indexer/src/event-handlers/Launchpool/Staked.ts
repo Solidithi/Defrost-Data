@@ -1,13 +1,13 @@
+import { In } from "typeorm";
 import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { LaunchpoolStake, User, Launchpool } from "../model/generated";
-import { cacheStore, logger } from "../singletons";
-import * as launchpoolABI from "../typegen-abi/Launchpool";
-import { scheduleOnce } from "../tasks";
-import { updateLaunchpoolAPY } from "../tasks/actions";
-import { In } from "typeorm";
+import { LaunchpoolStake, User, Launchpool } from "../../model/generated";
+import { cacheStore, logger } from "../../singletons";
+import { scheduleOnce } from "../../tasks";
+import { updateLaunchpoolAPY } from "../../tasks/actions";
+import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
-export async function handleLaunchpoolStake(
+export async function handleStaked(
 	ctx: DataHandlerContext<Store>,
 	pendingLogs: Log[]
 ): Promise<{

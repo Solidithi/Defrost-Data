@@ -1,10 +1,15 @@
 import { Log } from "@subsquid/evm-processor";
 import { LogsHandler } from "./type";
-import { handleProjectCreated } from "./project-created";
-import { handleLaunchpoolCreated } from "./launchpool-created";
-import { handleLaunchpoolStake } from "./launchpool-stake";
-import { handleLaunchpoolUnstake } from "./launchpool-unstake";
-import { handleLaunchpoolProjectTokenClaim } from "./launchpool-project-token-claim";
+import {
+	handleProjectCreated,
+	handleLaunchpoolCreated,
+} from "./ProjectHubUpgradeable";
+import {
+	handleStaked,
+	handleUnstaked,
+	handleProjectTokensClaimed,
+	handleOwnerInterestsClaimed,
+} from "./Launchpool";
 import * as projectLibraryABI from "../typegen-abi/ProjectLibrary";
 import * as launchpoolLibraryABI from "../typegen-abi/LaunchpoolLibrary";
 import * as launchpoolABI from "../typegen-abi/Launchpool";
@@ -28,13 +33,17 @@ logsDispatch.set(launchpoolLibraryABI.events.LaunchpoolCreated.topic, {
 });
 logsDispatch.set(launchpoolABI.events.Staked.topic, {
 	pendingLogs: [],
-	logsHandler: handleLaunchpoolStake,
+	logsHandler: handleStaked,
 });
 logsDispatch.set(launchpoolABI.events.Unstaked.topic, {
 	pendingLogs: [],
-	logsHandler: handleLaunchpoolUnstake,
+	logsHandler: handleUnstaked,
 });
 logsDispatch.set(launchpoolABI.events.ProjectTokensClaimed.topic, {
 	pendingLogs: [],
-	logsHandler: handleLaunchpoolProjectTokenClaim,
+	logsHandler: handleProjectTokensClaimed,
+});
+logsDispatch.set(launchpoolABI.events.OwnerInterestsClaimed.topic, {
+	pendingLogs: [],
+	logsHandler: handleOwnerInterestsClaimed,
 });

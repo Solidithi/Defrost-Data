@@ -1,12 +1,12 @@
 import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { LaunchpoolUnstake, User, Launchpool } from "../model/generated";
-import { cacheStore, logger, prismaClient } from "../singletons";
-import * as launchpoolABI from "../typegen-abi/Launchpool";
+import { LaunchpoolUnstake, User, Launchpool } from "../../model/generated";
+import { cacheStore, logger } from "../../singletons";
+import * as launchpoolABI from "../../typegen-abi/Launchpool";
 import { In } from "typeorm";
-import { normalizeAddress } from "../utils";
+import { normalizeAddress } from "../../utils";
 
-export async function handleLaunchpoolUnstake(
+export async function handleUnstaked(
 	ctx: DataHandlerContext<Store>,
 	pendingLogs: Log[]
 ): Promise<{

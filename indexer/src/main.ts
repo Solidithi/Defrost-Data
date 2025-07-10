@@ -6,7 +6,7 @@ import * as projectLibraryABI from "./typegen-abi/ProjectLibrary";
 import * as launchpoolLibraryABI from "./typegen-abi/LaunchpoolLibrary";
 import * as launchpoolABI from "./typegen-abi/Launchpool";
 import "dotenv/config";
-import { logsDispatch } from "./handlers";
+import { logsDispatch } from "./event-handlers";
 import {
 	initTaskWorker,
 	initTaskScheduler,
@@ -91,14 +91,14 @@ async function onIndexerStartup(): Promise<void> {
 		1,
 		new Date(Date.now())
 	);
-	scheduleRecurring(
-		`snapshot-platform-metrics${Date.now()}`,
-		1,
-		snapshotPlatformMetrics,
-		[],
-		1,
-		1000 * 60 // every 1 minute
-	);
+	// scheduleRecurring(
+	// 	`snapshot-platform-metrics${Date.now()}`,
+	// 	1,
+	// 	snapshotPlatformMetrics,
+	// 	[],
+	// 	1,
+	// 	1000 * 60 // every 1 minute
+	// );
 
 	logger.info("");
 
@@ -130,11 +130,6 @@ onIndexerStartup().then(() =>
 		await onIndexerStartup();
 		processor.addLog;
 
-		// Debug
-		console.log(
-			"Topic[0] hash of event: ",
-			projectLibraryABI.events.ProjectCreated.topic
-		);
 		// Aggregeate logs by topic
 		for (const block of ctx.blocks) {
 			for (const log of block.logs) {

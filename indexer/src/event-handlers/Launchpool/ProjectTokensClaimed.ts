@@ -4,15 +4,15 @@ import {
 	Launchpool,
 	LaunchpoolProjectTokenClaim,
 	User,
-} from "../model/generated";
-import { logger } from "../singletons";
-import { normalizeAddress } from "../utils";
-import { cacheStore } from "../singletons";
+} from "../../model/generated";
+import { logger } from "../../singletons";
+import { normalizeAddress } from "../../utils";
+import { cacheStore } from "../../singletons";
 import { ethers } from "ethers";
-import { ethersProvider } from "../singletons";
-import * as launchpoolABI from "../typegen-abi/Launchpool";
+import { ethersProvider } from "../../singletons";
+import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
-export async function handleLaunchpoolProjectTokenClaim(
+export async function handleProjectTokensClaimed(
 	ctx: DataHandlerContext<Store>,
 	pendingLogs: Log[],
 	moreProps?: object
@@ -96,7 +96,7 @@ export async function handleLaunchpoolProjectTokenClaim(
 
 		claims.push(
 			new LaunchpoolProjectTokenClaim({
-				id: `${log.id}-${userAddr}`, // Unique ID for the claim event
+				id: `${log.id}-${userAddr}`, // Unique ID for the claim event (log.id is unique for each log, assigned by subsquid indexer)
 				user: { id: normalizeAddress(userAddr) } as User, // Link to the User entity using only its ID
 				launchpool: { id: normalizeAddress(log.address) } as Launchpool, // Link to the Launchpool entity using its ID (assuming log.address is the pool ID)
 				projectTokenAmount,
