@@ -1,0 +1,6 @@
+# SSL Certificates
+*.pem
+*.crt
+*.key
+certs/
+ca-certificate.*
