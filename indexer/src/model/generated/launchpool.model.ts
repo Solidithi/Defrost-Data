@@ -45,6 +45,9 @@ export class Launchpool {
     @BigIntColumn_({nullable: false})
     projectTokenAmount!: bigint
 
+    @IntColumn_({nullable: false})
+    projectTokenDecimals!: number
+
     @StringColumn_({nullable: false})
     vAssetAddress!: string
 

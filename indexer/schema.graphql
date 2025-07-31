@@ -41,6 +41,7 @@ type Launchpool @entity {
 	# Token information
 	projectTokenAddress: String!
 	projectTokenAmount: BigInt! # Total amount of project tokens to be distributed in this pool, initially decided by the project owner
+	projectTokenDecimals: Int! # Denormalized column, combined with caching for fast aggregation
 	vAssetAddress: String!
 	nativeAssetAddress: String! # Is this really needed?
 	# Pool configuration
