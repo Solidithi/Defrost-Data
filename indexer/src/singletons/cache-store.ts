@@ -65,20 +65,28 @@ export class CacheStore {
 	async getTokenInfo(
 		tokenAddress: string,
 		field: "name" | "symbol" | "decimals"
-	): Promise<number | null> {
+	): Promise<number | string | null> {
 		const key = `token${normalizeAddress(tokenAddress)}`;
-		const decimalsStr = await this.redisClient.hGet(key, field);
-		return decimalsStr ? Number(decimalsStr) : null;
+		const value = await this.redisClient.hGet(key, field);
+		switch (field) {
+			case "name":
+			case "symbol":
+				return value;
+			case "decimals":
+				return value ? parseInt(value, 10) : null;
+			default:
+				return null;
+		}
 	}
 
 	async saveTokenInfoField(
 		tokenAddress: string,
 		field: "name" | "symbol" | "decimals",
-		value: string,
+		valueAsString: string,
 		TTL?: number
 	): Promise<void> {
 		const key = `token${normalizeAddress(tokenAddress)}`;
-		await this.redisClient.hSet(key, field, value);
+		await this.redisClient.hSet(key, field, valueAsString);
 		if (TTL) {
 			await this.redisClient.expire(key, TTL);
 		}
