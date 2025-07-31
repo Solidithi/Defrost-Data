@@ -29,7 +29,7 @@ export async function handleLaunchpoolCreated(
 		const launchpoolCreated =
 			launchpoolLibraryAbi.events.LaunchpoolCreated.decode(log);
 
-		const projectOwnerAddr = log.transaction.from.toString().toLowerCase();
+		const projectOwnerAddr = normalizeAddress(log.transaction.from);
 		ownerToLastActive.set(projectOwnerAddr, new Date(log.block.timestamp));
 
 		return new Launchpool({
