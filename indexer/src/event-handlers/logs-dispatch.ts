@@ -9,6 +9,7 @@ import {
 	handleUnstaked,
 	handleProjectTokensClaimed,
 	handleOwnerInterestsClaimed,
+	handlePlatformFeeClaimed,
 } from "./Launchpool";
 import * as projectLibraryABI from "../typegen-abi/ProjectLibrary";
 import * as launchpoolLibraryABI from "../typegen-abi/LaunchpoolLibrary";
@@ -46,4 +47,8 @@ logsDispatch.set(launchpoolABI.events.ProjectTokensClaimed.topic, {
 logsDispatch.set(launchpoolABI.events.OwnerInterestsClaimed.topic, {
 	pendingLogs: [],
 	logsHandler: handleOwnerInterestsClaimed,
+});
+logsDispatch.set(launchpoolABI.events.PlatformFeeClaimed.topic, {
+	pendingLogs: [],
+	logsHandler: handlePlatformFeeClaimed,
 });
