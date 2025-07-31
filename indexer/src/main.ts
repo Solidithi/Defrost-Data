@@ -99,14 +99,14 @@ async function onIndexerStartup(): Promise<void> {
 		1,
 		new Date(Date.now())
 	);
-	// scheduleRecurring(
-	// 	`snapshot-platform-metrics${Date.now()}`,
-	// 	1,
-	// 	snapshotPlatformMetrics,
-	// 	[],
-	// 	1,
-	// 	1000 * 60 // every 1 minute
-	// );
+	scheduleRecurring(
+		`snapshot-platform-metrics${Date.now()}`,
+		1,
+		snapshotPlatformMetrics,
+		[],
+		1,
+		1000 * 10 // every 10 seconds
+	);
 
 	logger.info("");
 
@@ -157,18 +157,30 @@ onIndexerStartup().then(() =>
 		}
 
 		// Process aggregated batches of logs
-		const dispatches = Array.from(logsDispatch.entries());
-		const results = await Promise.all(
-			dispatches.map(async ([_, dispatch]) =>
-				dispatch.logsHandler(ctx, dispatch.pendingLogs)
-			)
-		);
-		results.map((result) => {
-			logsDispatch.set(result.topic0, {
-				...logsDispatch.get(result.topic0),
+		const dispatchArray = Array.from(logsDispatch.entries());
+		// const results = await Promise.all(
+		// 	dispatches.map(async ([_, dispatch]) =>
+		// 		dispatch.logsHandler(ctx, dispatch.pendingLogs)
+		// 	)
+		// );
+		// results.map((result) => {
+		// 	logsDispatch.set(result.topic0, {
+		// 		...logsDispatch.get(result.topic0),
+		// 		pendingLogs: result.unprocessedLogs,
+		// 	});
+		// });
+
+		// Call the handler for each dispatch sequentially
+		for (const [topic0, dispatch] of dispatchArray) {
+			const result = await dispatch.logsHandler(
+				ctx,
+				dispatch.pendingLogs
+			);
+			logsDispatch.set(topic0, {
+				...dispatch,
 				pendingLogs: result.unprocessedLogs,
 			});
-		});
+		}
 	})
 );
 
