@@ -30,7 +30,9 @@ export async function handleUnstaked(
 		for (const log of pendingLogs) {
 			const poolAddress = normalizeAddress(log.address);
 
-			if (!cacheStore.isObservedLaunchpool(poolAddress)) {
+			const isPoolObserved =
+				await cacheStore.isObservedLaunchpool(poolAddress);
+			if (!isPoolObserved) {
 				skippedLogsCount++;
 				continue;
 			}

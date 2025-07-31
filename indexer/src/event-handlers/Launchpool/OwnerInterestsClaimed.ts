@@ -1,7 +1,7 @@
 import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { LaunchpoolOwnerInterestsClaimed, User, Launchpool } from "../../model";
-import { logger } from "../../singletons";
+import { cacheStore, logger } from "../../singletons";
 import { normalizeAddress } from "../../utils";
 import { In } from "typeorm";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
@@ -25,6 +25,14 @@ export async function handleOwnerInterestsClaimed(
 	);
 
 	for (const log of pendingLogs) {
+		const poolAddress = normalizeAddress(log.address);
+
+		const isPoolObserved =
+			await cacheStore.isObservedLaunchpool(poolAddress);
+		if (!isPoolObserved) {
+			continue;
+		}
+
 		const { claimer, ownerClaims, platformFee } =
 			launchpoolABI.events.OwnerInterestsClaimed.decode(log);
 
@@ -60,10 +68,10 @@ export async function handleOwnerInterestsClaimed(
 	dbUsers.forEach((dbUser) => {
 		const dbUserAddress = normalizeAddress(dbUser.id);
 		const preparedUser = addressToUser.get(dbUserAddress);
-		addressToUser.set(dbUserAddress, {
-			...dbUser,
-			lastActive: preparedUser.lastActive,
-		});
+		if (preparedUser) {
+			dbUser.lastActive = preparedUser.lastActive;
+			addressToUser.set(dbUserAddress, dbUser);
+		}
 	});
 
 	await ctx.store.save(Array.from(addressToUser.values()));

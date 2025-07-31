@@ -29,6 +29,14 @@ export async function handleProjectTokensClaimed(
 	);
 
 	for (const log of pendingLogs) {
+		const poolAddress = normalizeAddress(log.address);
+
+		const isPoolObserved =
+			await cacheStore.isObservedLaunchpool(poolAddress);
+		if (!isPoolObserved) {
+			continue;
+		}
+
 		const { user: userAddr, amount: projectTokenAmount } =
 			launchpoolABI.events.ProjectTokensClaimed.decode(log);
 

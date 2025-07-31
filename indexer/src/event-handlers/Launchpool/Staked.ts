@@ -5,6 +5,7 @@ import { LaunchpoolStake, User, Launchpool } from "../../model/generated";
 import { cacheStore, logger } from "../../singletons";
 import { scheduleOnce } from "../../tasks";
 import { updateLaunchpoolAPY } from "../../tasks/actions";
+import { normalizeAddress } from "../../utils";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
 export async function handleStaked(
@@ -30,9 +31,11 @@ export async function handleStaked(
 		let skippedLogsCount = 0;
 
 		for (const log of pendingLogs) {
-			const poolAddress = log.address.toString().toLowerCase();
+			const poolAddress = normalizeAddress(log.address);
 
-			if (!cacheStore.isObservedLaunchpool(poolAddress)) {
+			const isPoolObserved =
+				await cacheStore.isObservedLaunchpool(poolAddress);
+			if (!isPoolObserved) {
 				skippedLogsCount++;
 				continue;
 			}
