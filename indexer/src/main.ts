@@ -2,9 +2,9 @@ import "reflect-metadata";
 import { EvmBatchProcessor } from "@subsquid/evm-processor";
 import { logger, prismaClient, typeormDB, cacheStore } from "./singletons";
 import { selectedChain } from "./config";
-import * as projectLibraryABI from "./typegen-abi/ProjectLibrary";
-import * as launchpoolLibraryABI from "./typegen-abi/LaunchpoolLibrary";
-import * as launchpoolABI from "./typegen-abi/Launchpool";
+import * as typedProjectLibraryABI from "./typegen-abi/ProjectLibrary";
+import * as typedLaunchpoolLibraryABI from "./typegen-abi/LaunchpoolLibrary";
+import * as typedLaunchpoolABI from "./typegen-abi/Launchpool";
 import "dotenv/config";
 import { logsDispatch } from "./event-handlers";
 import {
@@ -48,27 +48,35 @@ const processor = new EvmBatchProcessor()
 			return args["indexFromBlock"] ?? selectedChain.indexFromBlock;
 		})(),
 	})
-	.setFinalityConfirmation(10) // 6 seconds confirmation time
+	.setFinalityConfirmation(10) // 10 seconds confirmation time
 	.addLog({
 		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubUpgradable Proxy contract
-		topic0: [projectLibraryABI.events.ProjectCreated.topic],
+		topic0: [typedProjectLibraryABI.events.ProjectCreated.topic],
 		transaction: true,
 	})
 	.addLog({
 		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubUpgradable Proxy contract
-		topic0: [launchpoolLibraryABI.events.LaunchpoolCreated.topic],
+		topic0: [typedLaunchpoolLibraryABI.events.LaunchpoolCreated.topic],
 		transaction: true,
 	})
 	.addLog({
-		topic0: [launchpoolABI.events.Staked.topic],
+		topic0: [typedLaunchpoolABI.events.Staked.topic],
 		transaction: true,
 	})
 	.addLog({
-		topic0: [launchpoolABI.events.Unstaked.topic],
+		topic0: [typedLaunchpoolABI.events.Unstaked.topic],
 		transaction: true,
 	})
 	.addLog({
-		topic0: [launchpoolABI.events.ProjectTokensClaimed.topic],
+		topic0: [typedLaunchpoolABI.events.ProjectTokensClaimed.topic],
+		transaction: true,
+	})
+	.addLog({
+		topic0: [typedLaunchpoolABI.events.OwnerInterestsClaimed.topic],
+		transaction: true,
+	})
+	.addLog({
+		topic0: [typedLaunchpoolABI.events.PlatformFeeClaimed.topic],
 		transaction: true,
 	});
 
