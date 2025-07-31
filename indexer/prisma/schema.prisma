@@ -29,6 +29,7 @@ model launchpool {
   combined_apy                        Decimal                               @db.Decimal
   created_at                          DateTime                              @db.Timestamptz(6)
   updated_at                          DateTime                              @db.Timestamptz(6)
+  project_token_amount                Decimal                               @db.Decimal
   project                             project                               @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e0adb6bb4df5fcacfe76c9e944a")
   launchpool_emission_rate            launchpool_emission_rate[]
   launchpool_interest_claim           launchpool_interest_claim[]
