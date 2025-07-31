@@ -2,9 +2,11 @@ import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { LaunchpoolUnstake, User, Launchpool } from "../../model/generated";
 import { cacheStore, logger } from "../../singletons";
+import { updateLaunchpoolAPY } from "../../tasks/actions";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
 import { In } from "typeorm";
 import { normalizeAddress } from "../../utils";
+import { scheduleOnce } from "../../tasks";
 
 export async function handleUnstaked(
 	ctx: DataHandlerContext<Store>,
@@ -256,10 +258,24 @@ export async function handleUnstaked(
 				`Pool stats update: totalStaked ${oldTotalStaked} -> ${launchpoolToSave.totalStaked}`
 			);
 
+			logger.trace("Scheduling APY update after unstakes");
+			scheduleOnce(
+				`update-staker-apy-${Date.now()}`,
+				10,
+				updateLaunchpoolAPY,
+				[poolAddress],
+				1,
+				new Date(Date.now() + 5000)
+			);
+
 			// Save updates for the current pool
 			await ctx.store.save(usersToSave);
 			await ctx.store.save(launchpoolToSave);
 			await ctx.store.save(unstakesToSave);
+
+			logger.trace(
+				`Scheduled APY update for pool ${poolAddress} in 5 seconds`
+			);
 
 			totalProcessedPools++;
 		}

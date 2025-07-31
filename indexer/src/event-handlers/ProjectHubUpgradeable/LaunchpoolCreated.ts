@@ -25,67 +25,94 @@ export async function handleLaunchpoolCreated(
 
 	const ownerToLastActive = new Map<string, Date>();
 
-	const poolsToSave: Launchpool[] = pendingLogs.map((log) => {
-		const launchpoolCreated =
-			launchpoolLibraryAbi.events.LaunchpoolCreated.decode(log);
+	const poolsToSave: Launchpool[] = await Promise.all(
+		pendingLogs.map(async (log) => {
+			const launchpoolCreated =
+				launchpoolLibraryAbi.events.LaunchpoolCreated.decode(log);
 
-		const projectOwnerAddr = normalizeAddress(log.transaction.from);
-		ownerToLastActive.set(projectOwnerAddr, new Date(log.block.timestamp));
+			const projectOwnerAddr = normalizeAddress(log.transaction.from);
+			ownerToLastActive.set(
+				projectOwnerAddr,
+				new Date(log.block.timestamp)
+			);
 
-		return new Launchpool({
-			id: normalizeAddress(launchpoolCreated.poolAddress),
-			poolId: launchpoolCreated.poolId.toString(),
-			chainId: selectedChain.chainID,
-			txHash: log.getTransaction().hash,
-			projectId: launchpoolCreated.projectId.toString(),
+			// Cache projectTokenDecimals for fast access later (e.g. ProjectTokensClaimed event processing)
+			const launchpoolRemainingSeconds =
+				Math.min(
+					Number(
+						launchpoolCreated.endBlock - BigInt(log.block.height)
+					),
+					0
+				) * selectedChain.blockTime;
 
-			// Time tracking
-			startBlock: launchpoolCreated.startBlock,
-			endBlock: launchpoolCreated.endBlock,
-			// Estimate start/end dates based on current block timestamp and average block time
-			// Note: This is an estimation and might differ slightly from the actual block timestamps
-			startDate: new Date(
-				log.block.timestamp + // log.block.timestamp is in miliseconds
-					secondsBetweenBlocks(
-						log.block.height,
-						Number(launchpoolCreated.startBlock)
-					) *
-						1000 // Add estimated seconds * 1000 for milliseconds
-			),
-			endDate: new Date(
-				log.block.timestamp +
-					secondsBetweenBlocks(
-						log.block.height,
-						Number(launchpoolCreated.endBlock)
-					) *
-						1000 // Add estimated seconds * 1000 for milliseconds
-			),
+			await cacheStore.saveTokenInfoField(
+				launchpoolCreated.projectToken,
+				"decimals",
+				launchpoolCreated.projectTokenDecimals.toString(),
+				launchpoolRemainingSeconds + 86400 // Add 1 day to make sure
+			);
 
-			// Asset tracking
-			projectTokenAddress: normalizeAddress(
-				launchpoolCreated.projectToken
-			),
-			vAssetAddress: normalizeAddress(launchpoolCreated.vAsset),
-			nativeAssetAddress: normalizeAddress(launchpoolCreated.nativeAsset),
+			return new Launchpool({
+				id: normalizeAddress(launchpoolCreated.poolAddress),
+				poolId: launchpoolCreated.poolId.toString(),
+				chainId: selectedChain.chainID,
+				txHash: log.getTransaction().hash,
+				projectId: launchpoolCreated.projectId.toString(),
 
-			// Live stats
-			totalStaked: 0n,
-			totalStakers: 0,
+				// Time tracking
+				startBlock: launchpoolCreated.startBlock,
+				endBlock: launchpoolCreated.endBlock,
+				// Estimate start/end dates based on current block timestamp and average block time
+				// Note: This is an estimation and might differ slightly from the actual block timestamps
+				startDate: new Date(
+					log.block.timestamp + // log.block.timestamp is in miliseconds
+						secondsBetweenBlocks(
+							log.block.height,
+							Number(launchpoolCreated.startBlock)
+						) *
+							1000 // Add estimated seconds * 1000 for milliseconds
+				),
+				endDate: new Date(
+					log.block.timestamp +
+						secondsBetweenBlocks(
+							log.block.height,
+							Number(launchpoolCreated.endBlock)
+						) *
+							1000 // Add estimated seconds * 1000 for milliseconds
+				),
 
-			// APY information
-			stakerAPY: 0,
-			ownerAPY: 0,
-			platformAPY: 0,
-			combinedAPY: 0,
+				// Asset tracking
+				projectTokenAddress: normalizeAddress(
+					launchpoolCreated.projectToken
+				),
+				projectTokenAmount: launchpoolCreated.projectTokenAmount,
+				projectTokenDecimals: launchpoolCreated.projectTokenDecimals,
+				vAssetAddress: normalizeAddress(launchpoolCreated.vAsset),
+				nativeAssetAddress: normalizeAddress(
+					launchpoolCreated.nativeAsset
+				),
 
-			// Relations
-			project: { id: launchpoolCreated.projectId.toString() } as Project,
+				// Live stats
+				totalStaked: 0n,
+				totalStakers: 0,
 
-			// Time metadata
-			createdAt: new Date(log.block.timestamp),
-			updatedAt: new Date(log.block.timestamp),
-		});
-	});
+				// APY information
+				stakerAPY: 0,
+				ownerAPY: 0,
+				platformAPY: 0,
+				combinedAPY: 0,
+
+				// Relations
+				project: {
+					id: launchpoolCreated.projectId.toString(),
+				} as Project,
+
+				// Time metadata
+				createdAt: new Date(log.block.timestamp),
+				updatedAt: new Date(log.block.timestamp),
+			});
+		})
+	);
 
 	try {
 		await ctx.store.save(poolsToSave);

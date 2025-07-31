@@ -49,10 +49,10 @@ export async function handleProjectTokensClaimed(
 				id: launchpoolAddress,
 			}
 		);
-		let projectTokenDecimals = await cacheStore.getTokenInfo(
+		let projectTokenDecimals = (await cacheStore.getTokenInfo(
 			projectTokenAddress,
 			"decimals"
-		);
+		)) as number | null;
 
 		// Fetch project token decimals from blockchain if not cached
 		if (!projectTokenDecimals) {
@@ -81,7 +81,7 @@ export async function handleProjectTokensClaimed(
 
 				// calculate TTL based on pool end date
 				const now = new Date();
-				const TTL =
+				const launchpoolRemainingSeconds =
 					now >= endDate
 						? 60 * 60 * 24 // 1 day in seconds
 						: Math.ceil((endDate.getTime() - now.getTime()) / 1000); // pool remaining time in seconds
@@ -91,7 +91,7 @@ export async function handleProjectTokensClaimed(
 					projectTokenAddress,
 					"decimals",
 					projectTokenDecimals.toString(),
-					TTL
+					launchpoolRemainingSeconds + 86400 // add 1 day to TTL
 				);
 			} catch (err) {
 				logger.error(

@@ -283,7 +283,7 @@ export async function handleStaked(
 				}
 			}
 
-			console.trace("Scheduling APY update after creating stakes");
+			logger.trace("Scheduling APY update after after stakes");
 			scheduleOnce(
 				`update-staker-apy-${Date.now()}`,
 				10,
