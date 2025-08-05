@@ -146,6 +146,7 @@ export async function snapshotPlatformMetrics(): Promise<void> {
 		const insertData = await prismaClient.platform_metrics_snapshots.create(
 			{
 				data: {
+					id: `${timestamp}`,
 					timestamp: new Date(timestamp * 1000),
 					count_active_users: totalActiveUsers,
 					count_unique_users: totalUniqueUsers,
@@ -155,7 +156,6 @@ export async function snapshotPlatformMetrics(): Promise<void> {
 					total_value_locked: totalStakedAmount,
 					tokens_distributed:
 						resultTokensDistributed[0]?.tokens_distributed || 0,
-					id: `${timestamp}`,
 				},
 			}
 		);
