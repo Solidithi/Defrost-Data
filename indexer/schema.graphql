@@ -118,12 +118,12 @@ type LaunchpoolNativeExRateSnapshot @entity {
 
 type LaunchpoolProjectExRateSnapshot @entity {
 	id: ID!
-	poolId: String!
+	# poolId: String! # Is this really needed? Right now no use
 	timestamp: DateTime!
 	blockNumber: BigInt!
-	cumulativeExchangeRate: BigInt!
-	pendingExchangeRate: BigInt!
-
+	projectTokenExchangeRate: BigInt!
+	pendingExchangeRate: BigInt # This value is private in blockchain, make it nullable for now
+	stakerAPR: Float! # Staker's APR, calculated from the cumulative exchange rate and pending exchange rate
 	# Relations
 	launchpool: Launchpool!
 }

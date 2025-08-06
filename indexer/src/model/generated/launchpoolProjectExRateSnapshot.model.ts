@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, FloatColumn as FloatColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
 import {Launchpool} from "./launchpool.model"
 
 @Entity_()
@@ -10,9 +10,6 @@ export class LaunchpoolProjectExRateSnapshot {
     @PrimaryColumn_()
     id!: string
 
-    @StringColumn_({nullable: false})
-    poolId!: string
-
     @DateTimeColumn_({nullable: false})
     timestamp!: Date
 
@@ -20,10 +17,13 @@ export class LaunchpoolProjectExRateSnapshot {
     blockNumber!: bigint
 
     @BigIntColumn_({nullable: false})
-    cumulativeExchangeRate!: bigint
+    projectTokenExchangeRate!: bigint
 
-    @BigIntColumn_({nullable: false})
-    pendingExchangeRate!: bigint
+    @BigIntColumn_({nullable: true})
+    pendingExchangeRate!: bigint | undefined | null
+
+    @FloatColumn_({nullable: false})
+    stakerAPR!: number
 
     @Index_()
     @ManyToOne_(() => Launchpool, {nullable: true})

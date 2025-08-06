@@ -30,7 +30,7 @@ model launchpool {
   created_at                          DateTime                              @db.Timestamptz(6)
   updated_at                          DateTime                              @db.Timestamptz(6)
   project_token_amount                Decimal                               @db.Decimal
-  project_token_decimals              Int                                   @default(18)
+  project_token_decimals              Int
   project                             project                               @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e0adb6bb4df5fcacfe76c9e944a")
   launchpool_emission_rate            launchpool_emission_rate[]
   launchpool_interest_claim           launchpool_interest_claim[]
@@ -90,14 +90,14 @@ model launchpool_native_ex_rate_snapshot {
 }
 
 model launchpool_project_ex_rate_snapshot {
-  id                       String      @id(map: "PK_2001c62e364c91911dace26a392") @db.VarChar
-  pool_id                  String
-  timestamp                DateTime    @db.Timestamptz(6)
-  block_number             Decimal     @db.Decimal
-  cumulative_exchange_rate Decimal     @db.Decimal
-  pending_exchange_rate    Decimal     @db.Decimal
-  launchpool_id            String?     @db.VarChar
-  launchpool               launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f089a275a776b3bbcb76b598b69")
+  id                          String      @id(map: "PK_2001c62e364c91911dace26a392") @db.VarChar
+  timestamp                   DateTime    @db.Timestamptz(6)
+  block_number                Decimal     @db.Decimal
+  project_token_exchange_rate Decimal     @db.Decimal
+  pending_exchange_rate       Decimal?    @db.Decimal
+  launchpool_id               String?     @db.VarChar
+  staker_apr                  Decimal     @db.Decimal
+  launchpool                  launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f089a275a776b3bbcb76b598b69")
 
   @@index([launchpool_id], map: "IDX_f089a275a776b3bbcb76b598b6")
 }
