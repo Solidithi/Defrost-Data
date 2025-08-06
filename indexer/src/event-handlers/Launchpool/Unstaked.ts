@@ -2,11 +2,11 @@ import { Log, DataHandlerContext } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import { LaunchpoolUnstake, User, Launchpool } from "../../model/generated";
 import { cacheStore, logger } from "../../singletons";
-import { updateLaunchpoolAPY } from "../../tasks/actions";
-import * as launchpoolABI from "../../typegen-abi/Launchpool";
+import { updateLaunchpoolAPR } from "../../tasks/actions";
 import { In } from "typeorm";
 import { normalizeAddress } from "../../utils";
 import { scheduleOnce } from "../../tasks";
+import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
 export async function handleUnstaked(
 	ctx: DataHandlerContext<Store>,
@@ -258,13 +258,17 @@ export async function handleUnstaked(
 				`Pool stats update: totalStaked ${oldTotalStaked} -> ${launchpoolToSave.totalStaked}`
 			);
 
-			logger.trace("Scheduling APY update after unstakes");
+			logger.trace("Scheduling APR update after unstakes");
+			const argsUpdateLaunchpoolAPR = [
+				poolAddress,
+				poolData[poolData.length - 1].log.block.height,
+			];
 			scheduleOnce(
-				`update-staker-apy-${Date.now()}`,
+				`update-staker-apr-${Date.now()}`,
 				10,
-				updateLaunchpoolAPY,
-				[poolAddress],
-				1,
+				updateLaunchpoolAPR,
+				argsUpdateLaunchpoolAPR,
+				1, // retry count
 				new Date(Date.now() + 5000)
 			);
 

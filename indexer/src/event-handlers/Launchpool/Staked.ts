@@ -4,7 +4,7 @@ import { Store } from "@subsquid/typeorm-store";
 import { LaunchpoolStake, User, Launchpool } from "../../model/generated";
 import { cacheStore, logger } from "../../singletons";
 import { scheduleOnce } from "../../tasks";
-import { updateLaunchpoolAPY } from "../../tasks/actions";
+import { updateLaunchpoolAPR } from "../../tasks/actions";
 import { normalizeAddress } from "../../utils";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
@@ -160,9 +160,7 @@ export async function handleStaked(
 			);
 
 			// Check which users already staked in this pool
-			console.trace(
-				"Checking for users' existing stakes in this pool..."
-			);
+			logger.trace("Checking for users' existing stakes in this pool...");
 			const existingStakes = await ctx.store.find(LaunchpoolStake, {
 				where: {
 					user: In(userAddresses),
@@ -174,12 +172,12 @@ export async function handleStaked(
 				`Found ${existingStakes.length} existing stakes from these users in this pool`
 			);
 
-			console.trace("Creating a set of users with existing stakes...");
+			logger.trace("Creating a set of users with existing stakes...");
 			const usersWithExistingStakes = new Set(
 				existingStakes.map((stake) => stake.user.id)
 			);
 
-			console.trace("Checking for new stakers...");
+			logger.trace("Checking for new stakers...");
 			const newStakersCount = userAddresses.filter(
 				(addr) => !usersWithExistingStakes.has(addr)
 			).length;
@@ -260,7 +258,7 @@ export async function handleStaked(
 
 					try {
 						const stakeId = `${log.id}-${userAddress}`;
-						console.trace(`Creating stake: ID=${stakeId}`);
+						logger.trace(`Creating stake: ID=${stakeId}`);
 
 						const stake = new LaunchpoolStake({
 							id: stakeId,
@@ -283,17 +281,21 @@ export async function handleStaked(
 				}
 			}
 
-			logger.trace("Scheduling APY update after after stakes");
+			logger.trace("Scheduling APR update after after stakes");
+			const argsUpdateLaunchpoolAPR = [
+				poolAddress,
+				poolData[poolData.length - 1].log.block.height,
+			];
 			scheduleOnce(
-				`update-staker-apy-${Date.now()}`,
+				`update-staker-apr-${Date.now()}`,
 				10,
-				updateLaunchpoolAPY,
-				[poolAddress],
-				1,
+				updateLaunchpoolAPR,
+				argsUpdateLaunchpoolAPR,
+				1, // retry count
 				new Date(Date.now() + 5000)
 			);
-			console.trace(
-				`Scheduled APY update for pool ${poolAddress} in 5 seconds`
+			logger.trace(
+				`Scheduled APR update for pool ${poolAddress} in 5 seconds`
 			);
 
 			// Save everything in batches
@@ -301,7 +303,7 @@ export async function handleStaked(
 			await ctx.store.save(launchpoolToSave);
 			await ctx.store.save(stakesToSave);
 
-			console.trace(`Finished processing 1 pool: ${poolAddress}`);
+			logger.trace(`Finished processing 1 pool: ${poolAddress}`);
 			totalProcessedPools++;
 		}
 

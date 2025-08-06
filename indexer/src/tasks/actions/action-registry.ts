@@ -1,5 +1,5 @@
 /* Actions can't be serialized, so we need to map their names to the actual implementation */
-import { updateLaunchpoolAPY } from "./update-launchpool-apy";
+import { updateLaunchpoolAPR } from "./update-launchpool-apr";
 import { ActionHandler } from "../type";
 import { snapshotPlatformMetrics } from "./snapshot-platform-metrics";
 
@@ -14,6 +14,10 @@ export function registerAction<TArgs extends unknown[]>(
 	actionRegistry.set(name, handler as ActionHandler);
 }
 
-// REGISTER ACTIONS HERE
-registerAction(updateLaunchpoolAPY.name, updateLaunchpoolAPY);
-registerAction(snapshotPlatformMetrics.name, snapshotPlatformMetrics);
+/**
+ * @DEV REGISTER ACTIONS HERE
+ * This is a central place to register all action handlers.
+ * It allows us to easily add, remove, or modify actions without changing the core logic.
+ */
+registerAction("updateLaunchpoolAPR", updateLaunchpoolAPR);
+registerAction("snapshotPlatformMetrics", snapshotPlatformMetrics);

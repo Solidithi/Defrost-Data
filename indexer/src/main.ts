@@ -15,7 +15,7 @@ import {
 } from "./tasks";
 import yargs from "yargs";
 import { snapshotPlatformMetrics } from "./tasks/actions/snapshot-platform-metrics";
-import { updateLaunchpoolAPY } from "./tasks/actions";
+import { updateLaunchpoolAPR } from "./tasks/actions";
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
@@ -91,14 +91,14 @@ async function onIndexerStartup(): Promise<void> {
 		return;
 	}
 
-	scheduleOnce(
-		`update-staker-apy-${Date.now()}`,
-		10,
-		updateLaunchpoolAPY,
-		["0xfbe66a07021d7cf5bd89486abe9690421dcc649b"],
-		1,
-		new Date(Date.now())
-	);
+	// scheduleOnce(
+	// 	`update-launchpool-apr-${Date.now()}`,
+	// 	10,
+	// 	updateLaunchpoolAPR,
+	// 	["0xfbe66a07021d7cf5bd89486abe9690421dcc649b"],
+	// 	1,
+	// 	new Date(Date.now())
+	// );
 	scheduleRecurring(
 		`snapshot-platform-metrics${Date.now()}`,
 		1,
