@@ -8,8 +8,7 @@ import {
 import { logger } from "../../singletons";
 import { normalizeAddress } from "../../utils";
 import { cacheStore } from "../../singletons";
-import { ethers } from "ethers";
-import { ethersProvider } from "../../singletons";
+import { getAndCacheProjectTokenDecimals } from "../../utils/launchpool-project-token";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
 export async function handleProjectTokensClaimed(
@@ -43,63 +42,24 @@ export async function handleProjectTokensClaimed(
 		// Fetch project token decimals from cache
 		const launchpoolAddress = normalizeAddress(log.address);
 		// Read project token address from launchpool table
-		const { endDate, projectTokenAddress } = await ctx.store.findOneBy(
-			Launchpool,
-			{
+		const { endBlock: launchpoolEndBlock, projectTokenAddress } =
+			await ctx.store.findOneBy(Launchpool, {
 				id: launchpoolAddress,
-			}
-		);
-		let projectTokenDecimals = (await cacheStore.getTokenInfo(
-			projectTokenAddress,
-			"decimals"
-		)) as number | null;
+			});
 
-		// Fetch project token decimals from blockchain if not cached
-		if (!projectTokenDecimals) {
-			try {
-				const decimalsAbi = [
-					{
-						type: "function",
-						name: "decimals",
-						inputs: [],
-						outputs: [
-							{
-								name: "",
-								type: "uint8",
-								internalType: "uint8",
-							},
-						],
-						stateMutability: "view",
-					},
-				];
-				const tokenContract = new ethers.Contract(
-					projectTokenAddress,
-					decimalsAbi,
-					ethersProvider
-				);
-				projectTokenDecimals = await tokenContract.decimals();
-
-				// calculate TTL based on pool end date
-				const now = new Date();
-				const launchpoolRemainingSeconds =
-					now >= endDate
-						? 60 * 60 * 24 // 1 day in seconds
-						: Math.ceil((endDate.getTime() - now.getTime()) / 1000); // pool remaining time in seconds
-
-				// save to cache for later access
-				await cacheStore.saveTokenInfoField(
-					projectTokenAddress,
-					"decimals",
-					projectTokenDecimals.toString(),
-					launchpoolRemainingSeconds + 86400 // add 1 day to TTL
-				);
-			} catch (err) {
-				logger.error(
-					err,
-					`Failed to fetch decimals for project token ${projectTokenAddress}`
-				);
-				continue; // Skip this log if we can't get decimals
-			}
+		let projectTokenDecimals: number;
+		try {
+			projectTokenDecimals = await getAndCacheProjectTokenDecimals(
+				projectTokenAddress,
+				launchpoolEndBlock,
+				BigInt(log.block.height) // Current block number
+			);
+		} catch (error) {
+			logger.error(
+				error,
+				`Failed to fetch project token decimals for ${projectTokenAddress}`
+			);
+			continue; // Skip this log if we can't fetch decimals
 		}
 
 		claims.push(

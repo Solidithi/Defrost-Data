@@ -4,6 +4,7 @@ import { Launchpool, Project } from "../../model/generated";
 import { cacheStore, logger, prismaClient } from "../../singletons";
 import { selectedChain } from "../../config";
 import { normalizeAddress } from "../../utils";
+import { cacheProjectTokenDecimalsTilLauncpoolEnd } from "../../utils/launchpool-project-token";
 import * as launchpoolLibraryAbi from "../../typegen-abi/LaunchpoolLibrary";
 
 export async function handleLaunchpoolCreated(
@@ -37,19 +38,11 @@ export async function handleLaunchpoolCreated(
 			);
 
 			// Cache projectTokenDecimals for fast access later (e.g. ProjectTokensClaimed event processing)
-			const launchpoolRemainingSeconds =
-				Math.min(
-					Number(
-						launchpoolCreated.endBlock - BigInt(log.block.height)
-					),
-					0
-				) * selectedChain.blockTime;
-
-			await cacheStore.saveTokenInfoField(
+			await cacheProjectTokenDecimalsTilLauncpoolEnd(
 				launchpoolCreated.projectToken,
-				"decimals",
-				launchpoolCreated.projectTokenDecimals.toString(),
-				launchpoolRemainingSeconds + 86400 // Add 1 day to make sure
+				launchpoolCreated.projectTokenDecimals,
+				launchpoolCreated.endBlock,
+				BigInt(log.block.height) // current block number
 			);
 
 			return new Launchpool({
