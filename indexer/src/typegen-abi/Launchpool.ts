@@ -33,9 +33,10 @@ export const functions = {
     getEmissionRate: viewFun("0xc0a77da9", "getEmissionRate()", {}, p.uint256),
     getPlatformAndOwnerClaimableVAssets: viewFun("0xf76e14f5", "getPlatformAndOwnerClaimableVAssets()", {}, {"ownerClaims": p.uint256, "platformFee": p.uint256}),
     getPoolInfo: viewFun("0x60246c88", "getPoolInfo()", {}, {"_0": p.uint128, "_1": p.uint128, "_2": p.uint256, "_3": p.uint256}),
+    getPoolTokenomics: viewFun("0x428d9e22", "getPoolTokenomics()", {}, p.struct({"totalNativeStake": p.uint256, "totalVTokenStake": p.uint256, "projectTokenReserve": p.uint256, "emissionRate": p.uint256, "projectTokenExchangeRate": p.uint256, "nativeTokenExchangeRate": p.uint256})),
     getStakerNativeAmount: viewFun("0x7d334107", "getStakerNativeAmount(address)", {"_investor": p.address}, p.uint256),
     getStakingRange: viewFun("0xfce88e6f", "getStakingRange()", {}, {"_0": p.uint256, "_1": p.uint256}),
-    getTotalProjectToken: viewFun("0xf73a8b5c", "getTotalProjectToken()", {}, p.uint256),
+    getTotalProjectTokens: viewFun("0xb73712f3", "getTotalProjectTokens()", {}, p.uint256),
     getTotalStakedVTokens: viewFun("0x534a9d00", "getTotalStakedVTokens()", {}, p.uint256),
     getWithdrawableVTokens: viewFun("0x5bf0fa89", "getWithdrawableVTokens(uint256)", {"_withdrawnNativeTokens": p.uint256}, p.uint256),
     lastNativeExRate: viewFun("0x9b4f8321", "lastNativeExRate()", {}, p.uint256),
@@ -128,6 +129,10 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.getPoolInfo, {})
     }
 
+    getPoolTokenomics() {
+        return this.eth_call(functions.getPoolTokenomics, {})
+    }
+
     getStakerNativeAmount(_investor: GetStakerNativeAmountParams["_investor"]) {
         return this.eth_call(functions.getStakerNativeAmount, {_investor})
     }
@@ -136,8 +141,8 @@ export class Contract extends ContractBase {
         return this.eth_call(functions.getStakingRange, {})
     }
 
-    getTotalProjectToken() {
-        return this.eth_call(functions.getTotalProjectToken, {})
+    getTotalProjectTokens() {
+        return this.eth_call(functions.getTotalProjectTokens, {})
     }
 
     getTotalStakedVTokens() {
@@ -285,14 +290,17 @@ export type GetPlatformAndOwnerClaimableVAssetsReturn = FunctionReturn<typeof fu
 export type GetPoolInfoParams = FunctionArguments<typeof functions.getPoolInfo>
 export type GetPoolInfoReturn = FunctionReturn<typeof functions.getPoolInfo>
 
+export type GetPoolTokenomicsParams = FunctionArguments<typeof functions.getPoolTokenomics>
+export type GetPoolTokenomicsReturn = FunctionReturn<typeof functions.getPoolTokenomics>
+
 export type GetStakerNativeAmountParams = FunctionArguments<typeof functions.getStakerNativeAmount>
 export type GetStakerNativeAmountReturn = FunctionReturn<typeof functions.getStakerNativeAmount>
 
 export type GetStakingRangeParams = FunctionArguments<typeof functions.getStakingRange>
 export type GetStakingRangeReturn = FunctionReturn<typeof functions.getStakingRange>
 
-export type GetTotalProjectTokenParams = FunctionArguments<typeof functions.getTotalProjectToken>
-export type GetTotalProjectTokenReturn = FunctionReturn<typeof functions.getTotalProjectToken>
+export type GetTotalProjectTokensParams = FunctionArguments<typeof functions.getTotalProjectTokens>
+export type GetTotalProjectTokensReturn = FunctionReturn<typeof functions.getTotalProjectTokens>
 
 export type GetTotalStakedVTokensParams = FunctionArguments<typeof functions.getTotalStakedVTokens>
 export type GetTotalStakedVTokensReturn = FunctionReturn<typeof functions.getTotalStakedVTokens>
