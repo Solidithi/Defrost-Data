@@ -19,9 +19,6 @@ export class LaunchpoolProjectExRateSnapshot {
     @BigIntColumn_({nullable: false})
     projectTokenExchangeRate!: bigint
 
-    @BigIntColumn_({nullable: true})
-    pendingExchangeRate!: bigint | undefined | null
-
     @FloatColumn_({nullable: false})
     stakerAPR!: number
 

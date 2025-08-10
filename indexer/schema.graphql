@@ -122,7 +122,6 @@ type LaunchpoolProjectExRateSnapshot @entity {
 	timestamp: DateTime!
 	blockNumber: BigInt!
 	projectTokenExchangeRate: BigInt!
-	pendingExchangeRate: BigInt # This value is private in blockchain, make it nullable for now
 	stakerAPR: Float! # Staker's APR, calculated from the cumulative exchange rate and pending exchange rate
 	# Relations
 	launchpool: Launchpool!

@@ -94,7 +94,6 @@ model launchpool_project_ex_rate_snapshot {
   timestamp                   DateTime    @db.Timestamptz(6)
   block_number                Decimal     @db.Decimal
   project_token_exchange_rate Decimal     @db.Decimal
-  pending_exchange_rate       Decimal?    @db.Decimal
   launchpool_id               String?     @db.VarChar
   staker_apr                  Decimal     @db.Decimal
   launchpool                  launchpool? @relation(fields: [launchpool_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f089a275a776b3bbcb76b598b69")
