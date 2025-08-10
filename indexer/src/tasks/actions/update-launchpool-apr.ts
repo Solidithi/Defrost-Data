@@ -17,8 +17,8 @@ export async function updateLaunchpoolAPR(
 
 	const currDatetime = new Date();
 
-	prismaClient
-		.$transaction(async (tx) => {
+	try {
+		prismaClient.$transaction(async (tx) => {
 			const {
 				total_staked: totalNativeStaked,
 				project_token_address: projectTokenAddr,
@@ -131,10 +131,17 @@ export async function updateLaunchpoolAPR(
 					launchpool_id: normalizedPoolAddress,
 				},
 			});
-		})
-		.catch((error) => {
-			throw error;
 		});
+		// Re-throw the error to be handled by the caller
+		logger.info(
+			`Successfully updated launchpool APR for pool ${normalizedPoolAddress} at block ${snapshotBlockNum}`
+		);
+	} catch (error) {
+		logger.error(
+			error,
+			`Failed to update launchpool APR for pool ${normalizedPoolAddress} at block ${snapshotBlockNum}`
+		);
+	}
 }
 
 /**
@@ -174,6 +181,7 @@ export function calcStakerAPR(
 	return apy;
 }
 
-// function calcOwnerAPR() {
-// 	return 100;
-// }
+// TODO
+function calcOwnerAPR(): number {
+	return 100;
+}
