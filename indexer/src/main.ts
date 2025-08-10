@@ -15,7 +15,8 @@ import {
 } from "./tasks";
 import yargs from "yargs";
 import { snapshotPlatformMetrics } from "./tasks/actions/snapshot-platform-metrics";
-import { updateLaunchpoolAPR } from "./tasks/actions";
+import { getCurrentBlockNumber } from "./utils/block";
+import { recurringTaskPriorities } from "./tasks/priorities";
 
 // Initialize both task worker and scheduler
 Promise.all([initTaskWorker(), initTaskScheduler()])
@@ -36,49 +37,16 @@ logger.info(
 	`Observing project hub proxy contract: ${selectedChain.observedContracts.ProjectHubUpgradeableProxy}`
 );
 
-const processor = new EvmBatchProcessor()
-	.setGateway(selectedChain.squidGateway)
-	.setRpcEndpoint({
-		url: selectedChain.rpc,
-		rateLimit: 10,
-	})
-	.setBlockRange({
-		from: ((): number => {
-			const args = yargs(process.argv.slice(2)).parse();
-			return args["indexFromBlock"] ?? selectedChain.indexFromBlock;
-		})(),
-	})
-	.setFinalityConfirmation(10) // 10 seconds confirmation time
-	.addLog({
-		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubUpgradable Proxy contract
-		topic0: [typedProjectLibraryABI.events.ProjectCreated.topic],
-		transaction: true,
-	})
-	.addLog({
-		address: [selectedChain.observedContracts!.ProjectHubUpgradeableProxy], // ProjectHubUpgradable Proxy contract
-		topic0: [typedLaunchpoolLibraryABI.events.LaunchpoolCreated.topic],
-		transaction: true,
-	})
-	.addLog({
-		topic0: [typedLaunchpoolABI.events.Staked.topic],
-		transaction: true,
-	})
-	.addLog({
-		topic0: [typedLaunchpoolABI.events.Unstaked.topic],
-		transaction: true,
-	})
-	.addLog({
-		topic0: [typedLaunchpoolABI.events.ProjectTokensClaimed.topic],
-		transaction: true,
-	})
-	.addLog({
-		topic0: [typedLaunchpoolABI.events.OwnerInterestsClaimed.topic],
-		transaction: true,
-	})
-	.addLog({
-		topic0: [typedLaunchpoolABI.events.PlatformFeeClaimed.topic],
-		transaction: true,
-	});
+async function getBlockRangeFrom(): Promise<number> {
+	const args = yargs(process.argv.slice(2)).parse();
+	const indexFromBlockArg = args["indexFromBlock"];
+	if (indexFromBlockArg) {
+		return indexFromBlockArg.toString().toLowerCase() === "latest"
+			? await getCurrentBlockNumber()
+			: indexFromBlockArg;
+	}
+	return selectedChain.indexFromBlock;
+}
 
 let isIndexerInitialized = false;
 
@@ -91,21 +59,13 @@ async function onIndexerStartup(): Promise<void> {
 		return;
 	}
 
-	// scheduleOnce(
-	// 	`update-launchpool-apr-${Date.now()}`,
-	// 	10,
-	// 	updateLaunchpoolAPR,
-	// 	["0xfbe66a07021d7cf5bd89486abe9690421dcc649b"],
-	// 	1,
-	// 	new Date(Date.now())
-	// );
 	scheduleRecurring(
 		`snapshot-platform-metrics${Date.now()}`,
-		1,
+		recurringTaskPriorities.FEW_MINUTES_DELAY,
 		snapshotPlatformMetrics,
 		[],
 		1,
-		1000 * 10 // every 10 seconds
+		1000 * 60 * 60 * 12 // every 12 hours
 	);
 
 	logger.info("");
@@ -133,56 +93,110 @@ async function onIndexerStartup(): Promise<void> {
 	isIndexerInitialized = true;
 }
 
-onIndexerStartup().then(() =>
-	processor.run(typeormDB, async (ctx) => {
-		await onIndexerStartup();
-		processor.addLog;
+async function main(): Promise<void> {
+	const fromBlock = await getBlockRangeFrom();
 
-		// Aggregeate logs by topic
-		for (const block of ctx.blocks) {
-			for (const log of block.logs) {
-				const dispatch = logsDispatch.get(log.topics[0]);
-				if (!dispatch) continue;
+	const processor = new EvmBatchProcessor()
+		.setGateway(selectedChain.squidGateway)
+		.setRpcEndpoint({
+			url: selectedChain.rpc,
+			rateLimit: 10,
+		})
+		.setBlockRange({
+			from: fromBlock,
+		})
+		.setFinalityConfirmation(10) // 10 seconds confirmation time
+		.addLog({
+			address: [
+				selectedChain.observedContracts!.ProjectHubUpgradeableProxy,
+			], // ProjectHubUpgradable Proxy contract
+			topic0: [typedProjectLibraryABI.events.ProjectCreated.topic],
+			transaction: true,
+		})
+		.addLog({
+			address: [
+				selectedChain.observedContracts!.ProjectHubUpgradeableProxy,
+			], // ProjectHubUpgradable Proxy contract
+			topic0: [typedLaunchpoolLibraryABI.events.LaunchpoolCreated.topic],
+			transaction: true,
+		})
+		.addLog({
+			topic0: [typedLaunchpoolABI.events.Staked.topic],
+			transaction: true,
+		})
+		.addLog({
+			topic0: [typedLaunchpoolABI.events.Unstaked.topic],
+			transaction: true,
+		})
+		.addLog({
+			topic0: [typedLaunchpoolABI.events.ProjectTokensClaimed.topic],
+			transaction: true,
+		})
+		.addLog({
+			topic0: [typedLaunchpoolABI.events.OwnerInterestsClaimed.topic],
+			transaction: true,
+		})
+		.addLog({
+			topic0: [typedLaunchpoolABI.events.PlatformFeeClaimed.topic],
+			transaction: true,
+		});
 
-				console.log(
-					"Block timestamp from block is: ",
-					log.block.timestamp
-				);
-				console.log(
-					"Block.timestamp here is miliseconds since 1/1/1970, don't mismatch it with seconds"
-				);
+	onIndexerStartup().then(() =>
+		processor.run(typeormDB, async (ctx) => {
+			await onIndexerStartup();
+			processor.addLog;
 
-				dispatch.pendingLogs.push(log);
+			// Aggregeate logs by topic
+			for (const block of ctx.blocks) {
+				for (const log of block.logs) {
+					const dispatch = logsDispatch.get(log.topics[0]);
+					if (!dispatch) continue;
+
+					console.log(
+						"Block timestamp from block is: ",
+						log.block.timestamp
+					);
+					console.log(
+						"Block.timestamp here is miliseconds since 1/1/1970, don't mismatch it with seconds"
+					);
+
+					dispatch.pendingLogs.push(log);
+				}
 			}
-		}
 
-		// Process aggregated batches of logs
-		const dispatchArray = Array.from(logsDispatch.entries());
-		// const results = await Promise.all(
-		// 	dispatches.map(async ([_, dispatch]) =>
-		// 		dispatch.logsHandler(ctx, dispatch.pendingLogs)
-		// 	)
-		// );
-		// results.map((result) => {
-		// 	logsDispatch.set(result.topic0, {
-		// 		...logsDispatch.get(result.topic0),
-		// 		pendingLogs: result.unprocessedLogs,
-		// 	});
-		// });
+			// Process aggregated batches of logs
+			const dispatchArray = Array.from(logsDispatch.entries());
+			// const results = await Promise.all(
+			// 	dispatches.map(async ([_, dispatch]) =>
+			// 		dispatch.logsHandler(ctx, dispatch.pendingLogs)
+			// 	)
+			// );
+			// results.map((result) => {
+			// 	logsDispatch.set(result.topic0, {
+			// 		...logsDispatch.get(result.topic0),
+			// 		pendingLogs: result.unprocessedLogs,
+			// 	});
+			// });
 
-		// Call the handler for each dispatch sequentially
-		for (const [topic0, dispatch] of dispatchArray) {
-			const result = await dispatch.logsHandler(
-				ctx,
-				dispatch.pendingLogs
-			);
-			logsDispatch.set(topic0, {
-				...dispatch,
-				pendingLogs: result.unprocessedLogs,
-			});
-		}
-	})
-);
+			// Call the handler for each dispatch sequentially
+			for (const [topic0, dispatch] of dispatchArray) {
+				const result = await dispatch.logsHandler(
+					ctx,
+					dispatch.pendingLogs
+				);
+				logsDispatch.set(topic0, {
+					...dispatch,
+					pendingLogs: result.unprocessedLogs,
+				});
+			}
+		})
+	);
+}
+
+main().catch((err) => {
+	console.error("Fatal error:", err);
+	process.exit(1);
+});
 
 // Test schedule once
 // const poolAddress = "0xd2ae079e420c600d414444666182cf26f618de1e";
