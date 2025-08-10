@@ -3,6 +3,12 @@ import { taskQueue } from "./queue";
 import { cacheStore } from "../singletons";
 import { logger } from "../singletons";
 import { actionRegistry } from "./actions/action-registry";
+import {
+	oneTimeTaskPriorities,
+	OneTimeTaskPriority,
+	recurringTaskPriorities,
+	RecurringTaskPriority,
+} from "./priorities";
 
 // Store for recurring tasks
 const recurringTasks: Map<
@@ -66,7 +72,7 @@ export async function initTaskScheduler(): Promise<void> {
  */
 export function scheduleRecurring(
 	id: string,
-	priority: number = 1,
+	priority: RecurringTaskPriority = recurringTaskPriorities.NORMAL,
 	actionFunction: (...args: any[]) => Promise<void>,
 	actionArgs: any[],
 	retryCount: number = 3,
@@ -112,7 +118,7 @@ export function scheduleRecurring(
  */
 export function scheduleOnce(
 	id: string,
-	priority: number = 1,
+	priority: OneTimeTaskPriority = oneTimeTaskPriorities.NORMAL,
 	actionFunc: (...arg: any[]) => Promise<void>,
 	actionArgs: any[],
 	retryCount: number = 3,

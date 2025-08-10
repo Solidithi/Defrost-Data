@@ -4,8 +4,9 @@ import { Store } from "@subsquid/typeorm-store";
 import { LaunchpoolStake, User, Launchpool } from "../../model/generated";
 import { cacheStore, logger } from "../../singletons";
 import { scheduleOnce } from "../../tasks";
-import { updateLaunchpoolAPR } from "../../tasks/actions";
 import { normalizeAddress } from "../../utils";
+import { updateLaunchpoolAPR } from "../../tasks/actions";
+import { oneTimeTaskPriorities } from "../../tasks/priorities";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
 export async function handleStaked(
@@ -179,7 +180,7 @@ export async function handleStaked(
 
 			logger.trace("Checking for new stakers...");
 			const newStakersCount = userAddresses.filter(
-				(addr) => !usersWithExistingStakes.has(addr)
+				(addr) => !usersWithExistingStakes.has(normalizeAddress(addr))
 			).length;
 
 			console.debug(
@@ -282,28 +283,32 @@ export async function handleStaked(
 			}
 
 			logger.trace("Scheduling APR update after after stakes");
+			logger.info(
+				`Block height in staked: ${poolData[0].log.block.height}`
+			);
 			const argsUpdateLaunchpoolAPR = [
 				poolAddress,
 				poolData[poolData.length - 1].log.block.height,
 			];
-			scheduleOnce(
-				`update-staker-apr-${Date.now()}`,
-				10,
-				updateLaunchpoolAPR,
-				argsUpdateLaunchpoolAPR,
-				1, // retry count
-				new Date(Date.now() + 5000)
-			);
-			logger.trace(
-				`Scheduled APR update for pool ${poolAddress} in 5 seconds`
-			);
 
 			// Save everything in batches
 			await ctx.store.save(usersToSave);
 			await ctx.store.save(launchpoolToSave);
 			await ctx.store.save(stakesToSave);
 
-			logger.trace(`Finished processing 1 pool: ${poolAddress}`);
+			scheduleOnce(
+				`update-staker-apr-${Date.now()}`,
+				oneTimeTaskPriorities.FEW_SECONDS_DELAY,
+				updateLaunchpoolAPR,
+				argsUpdateLaunchpoolAPR,
+				1, // retry count
+				new Date(Date.now() + 5000)
+			);
+
+			console.log(
+				`Scheduled APR update for pool ${poolAddress} in 5 seconds`
+			);
+			console.log(`Finished processing 1 pool: ${poolAddress}`);
 			totalProcessedPools++;
 		}
 

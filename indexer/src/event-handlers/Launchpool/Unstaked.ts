@@ -6,6 +6,7 @@ import { updateLaunchpoolAPR } from "../../tasks/actions";
 import { In } from "typeorm";
 import { normalizeAddress } from "../../utils";
 import { scheduleOnce } from "../../tasks";
+import { oneTimeTaskPriorities } from "../../tasks/priorities";
 import * as launchpoolABI from "../../typegen-abi/Launchpool";
 
 export async function handleUnstaked(
@@ -265,7 +266,7 @@ export async function handleUnstaked(
 			];
 			scheduleOnce(
 				`update-staker-apr-${Date.now()}`,
-				10,
+				oneTimeTaskPriorities.FEW_SECONDS_DELAY,
 				updateLaunchpoolAPR,
 				argsUpdateLaunchpoolAPR,
 				1, // retry count
