@@ -3,6 +3,8 @@ import { cacheStore, prismaClient } from "../singletons";
 import { logger } from "../singletons";
 import { actionRegistry } from "./actions/action-registry";
 
+const WORKER_SLEEP_INTERVAL_MS = 350; // Interval to check for new tasks
+
 /**
  * Main worker function that processes tasks from the queue
  */
@@ -41,14 +43,14 @@ async function processNextTask(): Promise<void> {
 				message: "No tasks in the queue, waiting for 1 second...",
 				queueSize: taskQueue.size(),
 			});
-			setTimeout(processNextTask, 1000);
+			setTimeout(processNextTask, WORKER_SLEEP_INTERVAL_MS);
 			return;
 		}
 
 		// Get next task from the priority queue without removing it (for potential retries)
 		const task = taskQueue.peek();
 		if (!task) {
-			setTimeout(processNextTask, 1000);
+			setTimeout(processNextTask, WORKER_SLEEP_INTERVAL_MS);
 			return;
 		}
 
